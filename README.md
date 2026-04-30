@@ -161,7 +161,7 @@ fn comp_greet_command(ctx: &ShellContext) -> Suggest {
 // Define chain, parsing `GreetEntry` into `StateGreeting`
 #[chain]
 fn parse_name_to_greet(prev: GreetEntry) -> NextProcess {
-    let state_greeting: StateGreeting = Picker::<()>::new(prev.inner)
+    let state_greeting: StateGreeting = Picker::new(prev.inner)
         .pick_or::<String>((), "World")
         .unpack_directly()
         .into();

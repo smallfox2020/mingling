@@ -104,6 +104,16 @@ this::<ThisProgram>().modify_res(|r: &mut Global| {
 });
 ```
 
+11. **\[picker\]** For any type that can `Into<Vec<String>>`, `.pick()`, `.pick_or()`, and `.pick_or_route()` functions are now supported
+
+```rust
+// Before
+let name: String = Picker::new(prev.inner).pick("--name").unpack();
+
+// Now
+let name: String = prev.pick("--name").unpack();
+```
+
 #### **BREAKING CHANGES**:
 
 1. **\[macros\]** Removed macro `dispatcher_render!` from `mingling_macros`

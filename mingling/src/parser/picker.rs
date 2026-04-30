@@ -719,3 +719,69 @@ where
         T::build_enum(name)
     }
 }
+
+pub trait AsPicker
+where
+    Self: Into<Vec<String>>,
+{
+    /// Converts the value into a `Picker` by first converting it into a `Vec<String>`.
+    fn as_picker(self) -> Picker
+    where
+        Self: Sized,
+        Vec<String>: From<Self>,
+    {
+        let vec: Vec<String> = self.into();
+        Picker { args: vec.into() }
+    }
+
+    /// Extracts a value for the given flag and returns a `Pick1` builder (no route).
+    ///
+    /// The extracted type `TNext` must implement `Pickable` and `Default`.
+    /// If the flag is not present, the default value for `TNext` is used.
+    fn pick<TNext>(self, val: impl Into<Flag>) -> Pick1<TNext>
+    where
+        Self: Sized,
+        TNext: Pickable<Output = TNext> + Default,
+    {
+        let vec: Vec<String> = self.into();
+        let picker: Picker = vec.into();
+        picker.pick(val)
+    }
+
+    /// Extracts a value for the given flag, returning the provided default value if not present,
+    /// and returns a `Pick1` builder (no route).
+    ///
+    /// The extracted type `TNext` must implement `Pickable`.
+    /// If the flag is not present, the provided `or` value is used.
+    fn pick_or<TNext>(self, val: impl Into<Flag>, or: impl Into<TNext>) -> Pick1<TNext>
+    where
+        TNext: Pickable<Output = TNext>,
+    {
+        let vec: Vec<String> = self.into();
+        let picker: Picker = vec.into();
+        picker.pick_or(val, or)
+    }
+
+    /// Extracts a value for the given flag, storing the provided route if the flag is not present,
+    /// and returns a `PickWithRoute1` builder (with route).
+    ///
+    /// The extracted type `TNext` must implement `Pickable` and `Default`.
+    /// If the flag is not present, the default value for `TNext` is used and the provided `route`
+    /// is stored in the returned builder for later error handling.
+    fn pick_or_route<TNext, R>(self, val: impl Into<Flag>, route: R) -> PickWithRoute1<TNext, R>
+    where
+        TNext: Pickable<Output = TNext> + Default,
+    {
+        let vec: Vec<String> = self.into();
+        let picker: Picker = vec.into();
+        picker.pick_or_route(val, route)
+    }
+}
+
+// Implement AsPicker for any type that can be converted into a Vec<String>
+impl<T> AsPicker for T
+where
+    T: Sized,
+    Vec<String>: From<T>,
+{
+}
