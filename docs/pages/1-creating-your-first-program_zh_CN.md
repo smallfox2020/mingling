@@ -1,6 +1,6 @@
-<h1 align="center">Get Started CN</h1>
+<h1 align="center">创建您的第一个程序</h1>
 <p align="center">
-    欢迎使用 Mìng Lìng
+    了解 <b>Mingling</b>，并使用它创建您的第一个命令行程序
 </p>
 
 ## 前言
@@ -41,7 +41,7 @@ mingling = { git = "https://github.com/catilgrass/mingling", branch = "main" }
 
 #### 2. 创建程序
 
-  接下来，在 `src/main.rs` 中创建程序✏️
+  接下来，在 `src/main.rs` 中创建程序 ✏️
 
 ```rust
 fn main() {
@@ -119,7 +119,7 @@ fn main() {
 
 #### 5. 实现渲染行为
 
-  我们期望 `"greet"` 的时候输出 `"Hello, World"`：既然要输出到屏幕，那么我们可以使用 **Mingling** 的另一个组件 `Renderer`，它负责将数据渲染到终端 ✏️
+  我们期望 `"greet"` 的时候输出 `"Hello, World"`：既然要输出到终端，那么我们可以使用 **Mingling** 的另一个组件 `Renderer`，它负责将数据渲染到终端 ✏️
 
 ```rust
 // ...

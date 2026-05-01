@@ -1,6 +1,6 @@
-<h1 align="center">Get Started</h1>
+<h1 align="center">Creating your first Program</h1>
 <p align="center">
-    Welcome to Mìng Lìng
+    Learn <b>Mingling</b> and use it to create your first command-line program
 </p>
 
 ## Intro
