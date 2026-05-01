@@ -1,8 +1,3 @@
-//! Completion Attribute Macro Implementation
-//!
-//! This module provides the `#[completion]` attribute macro for automatically
-//! generating structs that implement the `Completion` trait from functions.
-
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{Ident, ItemFn, parse_macro_input};

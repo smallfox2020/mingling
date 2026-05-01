@@ -135,6 +135,7 @@ pub fn renderer_attr(item: TokenStream) -> TokenStream {
             let mut dummy_r = ::mingling::RenderResult::default();
             let r = &mut dummy_r;
             #fn_body
+            println!("{}", r.trim());
         }
     };
 

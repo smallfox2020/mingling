@@ -1,22 +1,3 @@
-//! Help Attribute Macro
-//!
-//! This module provides the `#[help]` attribute macro for automatically
-//! generating structs that implement the `HelpRequest` trait from functions.
-//!
-//! # Syntax
-//!
-//! ```rust,ignore
-//! #[help]
-//! fn help_my_entry(prev: MyEntry) {
-//!     // use r_println! here
-//!     r_println!("Help: ...");
-//! }
-//! ```
-//!
-//! This expands to:
-//! - A struct `HelpMyEntry` implementing `HelpRequest` with `Entry = MyEntry`
-//! - The original function with injected `RenderResult` dummy context
-
 use proc_macro::TokenStream;
 use quote::{ToTokens, quote};
 use syn::spanned::Spanned;

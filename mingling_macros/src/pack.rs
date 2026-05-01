@@ -1,8 +1,3 @@
-//! Chain Struct Macro Implementation
-//!
-//! This module provides the `pack!` macro for creating wrapper types
-//! with automatic implementations of common traits.
-
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::parse::{Parse, ParseStream};

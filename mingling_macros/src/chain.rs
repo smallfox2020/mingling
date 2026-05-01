@@ -1,11 +1,3 @@
-//! Chain Attribute Macro Implementation
-//!
-//! This module provides the `#[chain(Group)]` attribute macro for automatically
-//! generating structs that implement the `Chain` trait from functions.
-//!
-//! When the `async` feature is enabled, chain functions must be async functions.
-//! When the `async` feature is disabled, chain functions can be regular functions.
-
 use proc_macro::TokenStream;
 use quote::{ToTokens, quote};
 use syn::spanned::Spanned;

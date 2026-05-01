@@ -1,8 +1,3 @@
-//! Command Node Macro Implementation
-//!
-//! This module provides the `node` procedural macro for creating
-//! command nodes from dot-separated path strings.
-
 use just_fmt::kebab_case;
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;

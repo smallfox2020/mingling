@@ -1,8 +1,3 @@
-//! Setup Attribute Macro Implementation
-//!
-//! This module provides the `#[program_setup]` attribute macro for automatically
-//! generating structs that implement the `ProgramSetup` trait from functions.
-
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::spanned::Spanned;

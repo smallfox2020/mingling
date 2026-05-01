@@ -1,8 +1,3 @@
-//! Groupped Derive Macro Implementation
-//!
-//! This module provides the `#[derive(Groupped)]` macro for automatically
-//! implementing the `Groupped` trait on structs and enums.
-
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::quote;

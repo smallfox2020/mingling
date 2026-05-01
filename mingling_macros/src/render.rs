@@ -1,8 +1,3 @@
-//! Render Macros Module
-//!
-//! This module provides procedural macros for rendering operations.
-//! These macros expect a mutable reference to a `RenderResult` named `r` to be in scope.
-
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::parse::Parser;

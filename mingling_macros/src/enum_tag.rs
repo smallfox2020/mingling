@@ -1,11 +1,3 @@
-//! EnumTag derive macro implementation
-//!
-//! This module provides the `#[derive(EnumTag)]` procedural macro for enums.
-//! The macro generates implementations of the `EnumTag` trait for enums with
-//! unit variants only (no fields). Variants can have an optional `#[enum_desc]`
-//! attribute to provide descriptions, and an optional `#[enum_rename]` attribute
-//! to rename the variant for building and listing purposes.
-
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{
