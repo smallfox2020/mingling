@@ -6,7 +6,7 @@ use std::{
 
 use crate::{ChainProcess, Program, ProgramCollect};
 
-pub type GlobalResources = Arc<Mutex<HashMap<TypeId, Box<dyn Any + Sync + Send>>>>;
+pub(crate) type GlobalResources = Arc<Mutex<HashMap<TypeId, Box<dyn Any + Sync + Send>>>>;
 
 impl<C> Program<C>
 where
