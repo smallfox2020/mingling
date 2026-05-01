@@ -11,8 +11,6 @@ nightly = []
 default = []
 async = []
 
-full = ["comp", "general_renderer"]
-
 clap = []
 comp = ["dep:just_template"]
 debug = ["dep:log", "dep:env_logger"]

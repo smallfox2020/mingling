@@ -23,7 +23,6 @@ async = ["mingling_core/async", "mingling_macros/async"]
 default = ["mingling_core/default"]
 
 clap = ["mingling_core/clap", "mingling_macros/clap"]
-full = ["mingling_core/full", "mingling_macros/full", "comp", "parser"]
 general_renderer = [
     "mingling_core/general_renderer",
     "dep:serde",

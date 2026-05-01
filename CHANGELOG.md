@@ -182,6 +182,8 @@ let (name, age) = Picker::new(prev.inner)
 
 8. **\[macros\]** Removed `#[derive(Debug)]` from generated pack types to remove unnecessary trait bounds.
 
+9. **\[macros\]** **\[core\]** **\[mingling\]** Removed the `full` feature from all crates.
+
 ---
 
 ### Release 0.1.6 **\[YANKED\]**

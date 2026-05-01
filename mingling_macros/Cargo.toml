@@ -14,8 +14,6 @@ nightly = []
 default = []
 async = []
 
-full = ["comp", "general_renderer"]
-
 clap = []
 comp = []
 general_renderer = []
