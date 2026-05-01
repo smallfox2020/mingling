@@ -16,6 +16,7 @@ tokio = { version = "1", features = ["full"] }
 mingling = { path = ".", features = ["full"] }
 
 [features]
+nightly = ["mingling_core/nightly", "mingling_macros/nightly"]
 debug = ["mingling_core/debug"]
 async = ["mingling_core/async", "mingling_macros/async"]
 

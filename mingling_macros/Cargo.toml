@@ -10,6 +10,7 @@ description = "Macros of the mingling library"
 proc-macro = true
 
 [features]
+nightly = []
 default = []
 async = []
 
