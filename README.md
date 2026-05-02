@@ -11,42 +11,42 @@
 <p align="center">
 	<img src="https://img.shields.io/github/stars/CatilGrass/mingling?style=for-the-badge"> 
 	<a href="https://crates.io/crates/mingling">
-	  <img src="https://img.shields.io/crates/v/mingling?style=for-the-badge">
+	    <img src="https://img.shields.io/crates/v/mingling?style=for-the-badge">
 	</a>
 	<a href="https://docs.rs/mingling/latest/mingling/">
-	  <img src="https://img.shields.io/docsrs/mingling?style=for-the-badge">
+	    <img src="https://img.shields.io/docsrs/mingling?style=for-the-badge">
 	</a>	
 	<a href="https://catilgrass.github.io/mingling/">
 	    <img src="https://img.shields.io/badge/helpdoc-latest-yellow?style=for-the-badge">
-	</a>	
-	<img src="https://img.shields.io/badge/current-0.1.6-green?style=for-the-badge">
+	</a>
 </p>
+
 
 > [!WARNING]
 >
 > **Note**: Mingling is still under active development, and its API may change. Feel free to try it out and give us feedback!
 > **Hint**: This note will be removed in version `0.5.0`
 
-## Contents
+## 📚 Contents
 
-- [Intro](#intro)
-- [Quick Start](#quick-start)
-- [Core Concepts](#core-concepts)
-- [Project Structure](#project-structure)
-- [Example Projects](#example-projects)
-- [Next Steps](#next-steps)
-- [Roadmap](#roadmap)
-- [Unplanned Features](#unplanned-features)
-- [License](#license)
+- [🚀 Intro](#intro)
+- [⚡ Quick Start](#quick-start)
+- [🧠 Core Concepts](#core-concepts)
+- [🏗️ Project Structure](#project-structure)
+- [💡 Example Projects](#example-projects)
+- [👣 Next Steps](#next-steps)
+- [🗺️ Roadmap](#roadmap)
+- [🚫 Unplanned Features](#unplanned-features)
+- [📄 License](#license)
 
-## Intro
+## 🚀 Intro
 
 [`Mingling`](https://github.com/CatilGrass/mingling) is a **proc-macro and type system-based** Rust CLI framework, suitable for developing complex command-line programs with numerous subcommands.
 
 > BTW: Its name comes from the Chinese Pinyin "mìng lìng", meaning "Command". 😄
 
 
-## Quick Start
+## ⚡ Quick Start
 
 > To use a release version of `Mingling`, get the latest version from [`crates.io`](https://crates.io/crates/mingling)
 >
@@ -195,7 +195,7 @@ Output:
    Command "great" not found.
 ```
 
-## Core Concepts
+## 🧠 Core Concepts
 
 Mingling abstracts command execution into the following parts:
 
@@ -213,14 +213,14 @@ Mingling abstracts command execution into the following parts:
 	</p>
 </details>
 
-## Project Structure
+## 🏗️ Project Structure
 
 The Mingling project consists of two main parts:
 
 - **[mingling/](mingling/)** - The core runtime library, containing type definitions, error handling, and basic functionality.
 - **[mingling_macros/](mingling_macros/)** - The procedural macro library, providing declarative macros to simplify development.
 
-## Example Projects
+## 💡 Example Projects
 
 - **[`examples/example-basic/`](examples/example-basic/src/main.rs)** - A simple "Hello, World!" example demonstrating the most basic usage of a Dispatcher and Renderer.
 - **[`examples/example-async/`](examples/example-async/src/main.rs)** - Based on `example-basic`, demonstrates how to integrate an async runtime
@@ -228,7 +228,7 @@ The Mingling project consists of two main parts:
 - **[`examples/example-general-renderer/`](examples/example-general-renderer/src/main.rs)** - Shows how to use a general renderer for different data types (e.g., JSON, YAML, TOML, RON).
 - **[`examples/example-completion/`](examples/example-completion/src/main.rs)** - An example implementing auto-completion for the shell.
 
-## Next Steps
+## 👣 Next Steps
 
 You can read the following docs to learn more about the `Mingling` framework:
 
@@ -236,23 +236,23 @@ You can read the following docs to learn more about the `Mingling` framework:
 - Check out **[Mingling Examples](examples/)** to learn about the core library.
 - Check out **[Mingling Docs](https://docs.rs/mingling/latest/mingling/)** to learn how to use the macro system and explore the full API.
 
-## Roadmap
+## 🗺️ Roadmap
 
 - [x] core: \[[0.1.4](https://docs.rs/mingling/0.1.4/mingling/)\] General Renderers *( Json, Yaml, Toml, Ron )* 
 - [x] core: \[[0.1.5](https://docs.rs/mingling/0.1.5/mingling/)\] Completion *( Bash Zsh Fish Pwsh )*
-- [X] core: \[[0.1.6](https://docs.rs/mingling/0.1.6/mingling/)\] Smarter Completion Suggest Generation
-- [X] \[[0.1.7](https://docs.rs/mingling/0.1.7/mingling/)\] Clap Parser Support
-- [ ] core: \[**0.1.8**\] Faster Dispatcher
+- [x] core: \[[0.1.6](https://docs.rs/mingling/0.1.6/mingling/)\] Smarter Completion Suggest Generation
+- [x] \[[0.1.7](https://docs.rs/mingling/0.1.7/mingling/)\] Clap Parser Support
+- [x] core: \[[0.1.7](https://docs.rs/mingling/0.1.7/mingling/)\] Help System
+- [x] mling: \[[0.1.7](https://docs.rs/mingling/0.1.7/mingling/)\] Mingling-CLI Tool ( `mling` )
+- [ ] core: \[**0.1.8**\] Compile-Time Dispatcher Tree
 - [ ] \[**0.1.9**\] Helpdoc Generation
-- [ ] core: \[**0.1.9**\] Debug Toolkits (InvokeStackDisplay ...)
-- [ ] ...
-- [ ] \[**unplanned**\] Parser Theme
-- [ ] core: \[**unplanned**\] Parallel Chains
+- [ ] core: \[**0.1.9**\] Debug Toolkits ( `InvokeStackDisplay` )
+- [ ] core: \[**0.2.0**\] REPL Mode ( `program.exec_repl();` )
 - [ ] ...
 
-## Unplanned Features
+## 🚫 Unplanned Features
 
-While Mingling has several common CLI features that are **not planned** to be directly included in the framework.
+While Mingling has several common CLI features that are **NOT PLANNED** to be directly included in the framework.
 This is because the Rust ecosystem already has excellent and mature crates to handle these issues, and Mingling's design is intended to be used in combination with them.
 
 - **Colored Output**: To add color and styles (bold, italic, etc.) to terminal output, consider using crates like [`colored`](https://crates.io/crates/colored) or [`owo-colors`](https://crates.io/crates/owo-colors). You can integrate their types directly into your renderers.
@@ -260,7 +260,7 @@ This is because the Rust ecosystem already has excellent and mature crates to ha
 - **Progress Bars**: To display progress indicators, the [`indicatif`](https://crates.io/crates/indicatif) crate is the standard choice.
 - **TUI**: To build full-screen interactive terminal applications, it is recommended to use a framework like [`ratatui`](https://crates.io/crates/ratatui) (formerly `tui-rs`).
 
-## License
+## 📄 License
 
 This project is licensed under the MIT License. 
 
