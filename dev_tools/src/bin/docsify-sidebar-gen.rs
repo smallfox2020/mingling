@@ -9,32 +9,73 @@ const SIDEBAR_HEAD: &str = "- [Welcome!](README)\n";
 fn main() {
     println!("Refreshing _sidebar.md");
     gen_sidebar();
+    gen_translation_sidebars();
 }
 
+/// Generate _sidebar.md for the primary language
 fn gen_sidebar() {
     let repo_root = find_git_repo().unwrap();
     let pages_root = repo_root.join(PAGES_ROOT);
 
-    let mut lines = String::from(SIDEBAR_HEAD);
+    let lines = build_sidebar_content(&repo_root.join("docs"), &pages_root, SIDEBAR_HEAD);
+
+    let sidebar_path = repo_root.join(SIDEBAR_PATH);
+    std::fs::write(&sidebar_path, lines).unwrap();
+    println!("  Generated: {}", sidebar_path.display());
+}
+
+/// Generate _sidebar.md inside translation directories
+fn gen_translation_sidebars() {
+    let repo_root = find_git_repo().unwrap();
+    let docs_root = repo_root.join("docs");
+
+    if let Ok(read_dir) = std::fs::read_dir(&docs_root) {
+        for entry in read_dir.flatten() {
+            let path = entry.path();
+            let file_name = entry.file_name().to_string_lossy().to_string();
+
+            // Only process entries starting with '_' that are directories
+            if file_name.starts_with('_') && path.is_dir() {
+                // Check if this directory has a 'pages' subdirectory
+                let pages_dir = path.join("pages");
+                if !pages_dir.exists() || !pages_dir.is_dir() {
+                    continue;
+                }
+
+                // The _sidebar.md for a translation directory is relative to that directory,
+                // so strip_prefix should use the translation directory path, removing the _zh_CN/ prefix
+                let lines = build_sidebar_content(&path, &pages_dir, "- [Welcome!](README)\n");
+
+                let sidebar_path = path.join("_sidebar.md");
+                std::fs::write(&sidebar_path, lines).unwrap();
+                println!("  Generated: {}", sidebar_path.display());
+            }
+        }
+    }
+}
+
+/// Build sidebar content: scan .md files in pages_dir and return a formatted sidebar string
+fn build_sidebar_content(base_dir: &Path, pages_dir: &Path, sidebar_head: &str) -> String {
+    let mut lines = String::from(sidebar_head);
 
     // Collect and sort entries at root level first
     let mut root_files: Vec<SidebarEntry> = Vec::new();
     // Subdirectory name -> its files
     let mut sub_dirs: BTreeMap<String, Vec<SidebarEntry>> = BTreeMap::new();
 
-    if let Ok(read_dir) = std::fs::read_dir(&pages_root) {
+    if let Ok(read_dir) = std::fs::read_dir(pages_dir) {
         for entry in read_dir.flatten() {
             let path = entry.path();
             if path.is_dir() {
                 let dir_name = entry.file_name().to_string_lossy().to_string();
-                let entries = collect_markdown_files(&path);
+                let entries = collect_markdown_files(&path, base_dir);
                 if !entries.is_empty() {
                     sub_dirs.insert(dir_name, entries);
                 }
             } else if path.extension().is_some_and(|ext| ext == "md") {
                 let title = extract_title(&path);
                 let relative = path
-                    .strip_prefix(repo_root.join("docs"))
+                    .strip_prefix(base_dir)
                     .unwrap()
                     .to_string_lossy()
                     .replace('\\', "/");
@@ -67,9 +108,7 @@ fn gen_sidebar() {
         }
     }
 
-    let sidebar_path = repo_root.join(SIDEBAR_PATH);
-    std::fs::write(&sidebar_path, lines).unwrap();
-    println!("  Generated: {}", sidebar_path.display());
+    lines
 }
 
 #[derive(Clone)]
@@ -78,11 +117,9 @@ struct SidebarEntry {
     link: String,
 }
 
-/// Collect all `.md` files directly under `dir` (non-recursive).
-fn collect_markdown_files(dir: &Path) -> Vec<SidebarEntry> {
+/// Collect all `.md` files directly under `dir`
+fn collect_markdown_files(dir: &Path, base_dir: &Path) -> Vec<SidebarEntry> {
     let mut entries = Vec::new();
-    let repo_root = find_git_repo().unwrap();
-    let docs_root = repo_root.join("docs");
 
     if let Ok(read_dir) = std::fs::read_dir(dir) {
         for entry in read_dir.flatten() {
@@ -90,7 +127,7 @@ fn collect_markdown_files(dir: &Path) -> Vec<SidebarEntry> {
             if path.extension().is_some_and(|ext| ext == "md") {
                 let title = extract_title(&path);
                 let relative = path
-                    .strip_prefix(&docs_root)
+                    .strip_prefix(base_dir)
                     .unwrap()
                     .to_string_lossy()
                     .replace('\\', "/");

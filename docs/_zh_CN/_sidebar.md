@@ -1,3 +1,3 @@
 - [Welcome!](README)
-* [Creating your first Program](pages/1-creating-your-first-program)
-* [Implementing Fallbacks](pages/2-implementing-fallbacks)
+* [创建您的第一个程序](pages/1-creating-your-first-program)
+* [实现回退机制](pages/2-implementing-fallbacks)
