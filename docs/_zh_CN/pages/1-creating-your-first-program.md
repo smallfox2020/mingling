@@ -56,7 +56,7 @@ mingling::macros::gen_program!();
  
 > [!TIP]
 >
->   `gen_Sprogram!()` 宏展开时，会收集在它之前展开的其他组件、类型的信息，这意味着您需要将 `gen_program!()` 放在整个 crate 中最后被展开的位置
+> `gen_program!()` 宏展开时，会收集在它之前展开的其他组件、类型的信息，这意味着您需要将 `gen_program!()` 放在整个 crate 中最后被展开的位置
 >
 > 我推荐放在 `main.rs` 或者 `lib.rs` 的结尾。
 
@@ -250,6 +250,8 @@ Hello, World!
 ~> your-bin greet Alice
 Hello, Alice!
 ```
+ 
+  至此，您已成功创建基本的 **Mingling** 命令行程序，下一章节将会讲述如何为您的命令行程序实现回退机制来处理命令不存在、渲染器不存在的情况。
  
 <p align="center" style="font-size: 0.85em; color: gray;">
     Written by @Weicao-CatilGrass

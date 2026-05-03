@@ -1,3 +1,6 @@
 - [Welcome!](README)
 * [Creating your first Program](pages/1-creating-your-first-program)
 * [Implementing Fallbacks](pages/2-implementing-fallbacks)
+* [Parsing Complex Args](pages/3-parsing-complex-arguments)
+* [Impl Help Display](pages/4-implementing-help-display)
+* [Impl Shell Completion](pages/5-implementing-completion)

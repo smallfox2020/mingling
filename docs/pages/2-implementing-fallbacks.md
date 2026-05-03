@@ -134,6 +134,8 @@ Renderer "ResultGreetSomeone" not found!
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 ```
  
+  The above is the fallback mechanism of **Mingling**. In the next chapter, you will learn how to use `Picker` to parse complex user inputs.
+ 
 <p align="center" style="font-size: 0.85em; color: gray;">
     Written by @Weicao-CatilGrass
 </p>

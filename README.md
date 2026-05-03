@@ -29,15 +29,15 @@
 
 ## 📚 Contents
 
-- [🚀 Intro](#intro)
-- [⚡ Quick Start](#quick-start)
-- [🧠 Core Concepts](#core-concepts)
-- [🏗️ Project Structure](#project-structure)
-- [💡 Example Projects](#example-projects)
-- [👣 Next Steps](#next-steps)
-- [🗺️ Roadmap](#roadmap)
-- [🚫 Unplanned Features](#unplanned-features)
-- [📄 License](#license)
+- [🚀 Intro](#🚀-intro)
+- [⚡ Quick Start](#⚡-quick-start)
+- [🧠 Core Concepts](#🧠-core-concepts)
+- [🏗️ Project Structure](#🏗️-project-structure)
+- [💡 Example Projects](#💡-example-projects)
+- [👣 Next Steps](#👣-next-steps)
+- [🗺️ Roadmap](#🗺️-roadmap)
+- [🚫 Unplanned Features](#🚫-unplanned-features)
+- [📄 License](#📄-license)
 
 ## 🚀 Intro
 
