@@ -6,7 +6,6 @@ use std::path::Path;
 ///
 /// This tool scans all `.md` files in the docs directory,
 /// and replaces completely empty lines before and after code blocks with blank lines containing a single space.
-
 const DOCS_DIR: &str = "./docs";
 
 fn main() {
