@@ -32,18 +32,18 @@ where
 {
     match result {
         ChainProcess::Ok(any) => {
-            if let Some(member_id) = member_id {
-                if member_id != any.0.member_id {
-                    panic!(
-                        "Unexpected result type: expected {}, found {}",
-                        member_id, any.0.member_id
-                    );
-                }
+            if let Some(member_id) = member_id
+                && member_id != any.0.member_id
+            {
+                panic!(
+                    "Unexpected result type: expected {}, found {}",
+                    member_id, any.0.member_id
+                );
             }
-            if let Some(next) = next {
-                if next != any.1 {
-                    panic!("Unexpected next state: expected {}, found {}", next, any.1);
-                }
+            if let Some(next) = next
+                && next != any.1
+            {
+                panic!("Unexpected next state: expected {}, found {}", next, any.1);
             }
         }
         ChainProcess::Err(chain_process_error) => {

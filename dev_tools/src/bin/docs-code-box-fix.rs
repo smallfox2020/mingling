@@ -82,8 +82,7 @@ fn fix_code_box_empty_lines(content: &str) -> String {
             ensure_space_before_code_block(&mut result);
 
             // output code content
-            for j in code_start..code_end {
-                let code_line = lines[j];
+            for code_line in lines.iter().take(code_end).skip(code_start) {
                 if code_line.is_empty() {
                     result.push(' ');
                 } else {

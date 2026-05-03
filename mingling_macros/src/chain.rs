@@ -77,7 +77,7 @@ pub fn chain_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
             match &**ty {
                 Type::Path(type_path) => {
                     let last_segment = type_path.path.segments.last().unwrap();
-                    if last_segment.ident.to_string() != "NextProcess" {
+                    if last_segment.ident != "NextProcess" {
                         return syn::Error::new(
                             ty.span(),
                             "Chain function must return `NextProcess`",
