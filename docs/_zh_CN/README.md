@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://github.com/CatilGrass/mingling">
-        <img alt="Mingling" src="../res/icon_shadow.png" width="40%">
+        <img alt="Mingling" src="../res/pixel_icon_o_1024.png" width="40%">
     </a>
 </p>
 <h1 align="center">Mingling 中文文档 🇨🇳</h1>

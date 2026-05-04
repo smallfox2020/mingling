@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://github.com/CatilGrass/mingling">
-        <img alt="Mingling" src="docs/res/icon_shadow.png" width="30%">
+        <img alt="Mingling" src="docs/res/pixel_icon_o_1024.png" width="30%">
     </a>
 </p>
 <h1 align="center">Mìng Lìng - 命令</h1>
