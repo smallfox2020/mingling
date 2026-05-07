@@ -271,3 +271,116 @@ fn proc(_prev: SomeType) -> NextProcess {
 3. **\[core\]** **\[macros\]** Added an `async` feature, which is disabled by default. `Mingling` no longer forces a dependency on an Async Runtime.
 
 4. **\[picker\]** Changed the signature of `pick_or` from `(..., or: TNext)` to `(..., or: impl Into<TNext>)`
+
+---
+
+> [!NOTE]
+>
+> Versions 0.1.0 through 0.1.5 were released before this CHANGELOG file existed (which was introduced in 0.1.6). The entries above have been retroactively reconstructed from git history and may not be fully comprehensive.
+
+---
+
+### Release 0.1.5
+
+#### Fixes:
+None
+
+#### Features:
+
+1. **\[completion\]** Added the completion system, including `ShellContext`, shell suggestion generation, and completion script build support (`build_comp_script_to`)
+2. **\[completion\]** Added `YesOrNo` and `TrueOrFalse` pickable boolean types for completion
+3. **\[core\]** Implemented `mingling::this` function for accessing the current program instance
+4. **\[workspace\]** Added workspace configuration and example projects
+5. **\[docs\]** Added architecture diagram, project branding, and README structure improvements
+
+#### BREAKING CHANGES:
+
+1. **\[macros\]** Renamed `DefaultProgram` to `ThisProgram` and removed `ThisProgram` marker type
+
+---
+
+### Release 0.1.4
+
+#### Fixes:
+None
+
+#### Features:
+
+1. **\[picker\]** Added vector pickers for collecting multiple values
+2. **\[picker\]** Added error routing to `Picker` with generic route type
+3. **\[picker\]** Added `after` method for post-processing picked values
+4. **\[macros\]** Added `Groupped` derive macro for automatic trait implementation
+5. **\[macros\]** Added `general_renderer` support with serialization formats (behind feature flag)
+6. **\[macros\]** Simplified attribute parsing in macros
+
+#### BREAKING CHANGES:
+None
+
+---
+
+### Release 0.1.3
+
+#### Fixes:
+
+1. **\[core\]** Added early exit for renderer not found in execution loop
+2. **\[core\]** Added default error handling methods to `ProgramCollect` trait
+
+#### Features:
+
+1. **\[core\]** Replaced typeid-based dispatch with enum-based dispatch for better performance
+2. **\[macros\]** Renamed `chain_struct` macro to `pack`
+3. **\[docs\]** Added documentation for `mingling_core` and public items in parser modules
+
+#### BREAKING CHANGES:
+
+1. **\[macros\]** The `chain_struct!` macro has been renamed to `pack!`
+
+---
+
+### Release 0.1.2
+
+#### Fixes:
+None
+
+#### Features:
+
+1. **\[parser\]** Added argument parser module with `Picker` API
+2. **\[parser\]** Added `Argument` type to picker builtins and exposed `Picker` publicly
+3. **\[core\]** Added `From<()>` implementation for `Flag`
+
+#### BREAKING CHANGES:
+None
+
+---
+
+### Release 0.1.1
+
+#### Fixes:
+None
+
+#### Features:
+
+1. **\[core\]** Replaced `ChainProcess` type alias with an enum for better type safety
+2. **\[core\]** Added `general_renderer` and `full` features
+3. **\[core\]** Removed `ProgramEnd` and `NoChainFound` hint markers
+4. **\[mingling\]** Created the `mingling` umbrella crate with core re-exports and documentation
+
+#### BREAKING CHANGES:
+
+1. **\[core\]** `ChainProcess` changed from a type alias to an enum; conversion code may need updating
+
+---
+
+### Release 0.1.0
+
+Initial release of the Mingling framework.
+
+#### Features:
+
+1. **\[core\]** Basic chain processing pipeline with `#[chain]` and `#[renderer]` macros
+2. **\[macros\]** `gen_program!` for program generation, `pack!` for wrapper types, `dispatcher!` for command routing
+3. **\[core\]** `Program` struct with dispatcher registration and execution
+4. **\[core\]** `RenderResult` for terminal output buffering
+5. **\[docs\]** README and license files
+
+---
