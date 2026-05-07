@@ -426,8 +426,17 @@ pub fn get_nodes<C: ProgramCollect<Enum = C>>(
     #[cfg(feature = "dispatch_tree")]
     let r = C::get_nodes();
 
+    #[cfg(feature = "dispatch_tree")]
+    {
+        #[cfg(feature = "debug")]
+        {
+            let node_strs: Vec<String> = r.iter().map(|v| v.0.clone()).collect();
+            crate::info!("All Nodes: [{}]", node_strs.join(", "));
+        }
+    }
+
     #[cfg(not(feature = "dispatch_tree"))]
-    let r = program
+    let r: Vec<_> = program
         .dispatcher
         .iter()
         .map(|disp| {
@@ -440,6 +449,15 @@ pub fn get_nodes<C: ProgramCollect<Enum = C>>(
             (node_str, &**disp)
         })
         .collect();
+
+    #[cfg(not(feature = "dispatch_tree"))]
+    {
+        #[cfg(feature = "debug")]
+        {
+            let node_strs: Vec<String> = r.iter().map(|v| v.0.clone()).collect();
+            crate::info!("All Nodes: [{}]", node_strs.join(", "));
+        }
+    }
 
     return r;
 }

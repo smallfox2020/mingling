@@ -104,14 +104,14 @@ fn build_dispatch_body(nodes: &[(String, String)], depth: usize) -> TokenStream 
         let name_space = format!("{} ", name);
         let name_lit = syn::LitStr::new(&name_space, proc_macro2::Span::call_site());
         let disp_ident = syn::Ident::new(disp_type, proc_macro2::Span::call_site());
+        let prefix_word_count = name.split_whitespace().count();
         quote! {
-            if let Some(stripped) = raw_str.strip_prefix(#name_lit) {
+            if raw_str.starts_with(#name_lit) {
+                let prefix_len = #prefix_word_count;
+                let trimmed_args: Vec<String> = raw.iter().skip(prefix_len).cloned().collect();
                 let __cp = <#disp_ident as ::mingling::Dispatcher<Self::Enum>>::begin(
                     &#disp_ident::default(),
-                    stripped
-                        .split_whitespace()
-                        .map(String::from)
-                        .collect::<Vec<String>>(),
+                    trimmed_args,
                 );
                 return match __cp {
                     ::mingling::ChainProcess::Ok(any_output) => Ok(any_output.0),
