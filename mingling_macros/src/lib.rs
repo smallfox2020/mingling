@@ -909,26 +909,21 @@ pub fn program_comp_gen(input: TokenStream) -> TokenStream {
     };
 
     let comp_dispatcher = quote! {
+        ::mingling::macros::dispatcher!(#name, "__comp", CompletionDispatcher => CompletionContext);
+        ::mingling::macros::pack!(
+            #name,
+            CompletionSuggest = (::mingling::ShellContext, ::mingling::Suggest)
+        );
+
+        #fn_exec_comp
+
+        ::mingling::macros::register_type!(CompletionContext);
+
         #[allow(unused)]
-        use __completion_gen::*;
-        pub mod __completion_gen {
-            use super::*;
-
-            ::mingling::macros::dispatcher!(#name, "__comp", CompletionDispatcher => CompletionContext);
-            ::mingling::macros::pack!(
-                #name,
-                CompletionSuggest = (::mingling::ShellContext, ::mingling::Suggest)
-            );
-
-            #fn_exec_comp
-
-            ::mingling::macros::register_type!(CompletionContext);
-
-            #[::mingling::macros::renderer(#name)]
-            pub fn __render_completion(prev: CompletionSuggest) {
-                let (ctx, suggest) = prev.inner;
-                ::mingling::CompletionHelper::render_suggest::<#name>(ctx, suggest);
-            }
+        #[::mingling::macros::renderer(#name)]
+        pub fn __render_completion(prev: CompletionSuggest) {
+            let (ctx, suggest) = prev.inner;
+            ::mingling::CompletionHelper::render_suggest::<#name>(ctx, suggest);
         }
     };
 

@@ -3,9 +3,7 @@ use mingling::{
     setup::{BasicProgramSetup, GeneralRendererSetup},
 };
 
-use crate::{
-    __completion_gen::CompletionDispatcher, DispatcherNotFound, ThisProgram, display::markdown,
-};
+use crate::{CompletionDispatcher, DispatcherNotFound, ThisProgram, display::markdown};
 
 pub mod list;
 pub use list::*;
