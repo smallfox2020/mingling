@@ -54,7 +54,7 @@
 
 ```toml
 # From crates.io
-mingling = "0.1.7"
+mingling = "0.1.8"
 
 # From GitHub
 mingling = { git = "https://github.com/catilgrass/mingling", branch = "main" }
