@@ -219,7 +219,7 @@ pub fn register_dispatcher(input: TokenStream) -> TokenStream {
     let expanded = quote! {
         #[doc(hidden)]
         #[allow(nonstandard_style)]
-        static #static_ident: #dispatcher_type = #dispatcher_type;
+        pub static #static_ident: #dispatcher_type = #dispatcher_type;
     };
 
     expanded.into()
