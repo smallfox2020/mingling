@@ -52,6 +52,14 @@
 >
 > To use the latest version, pull the project from the `main` branch on `github`
 
+If you have [`cargo-generate`](https://cargo-generate.github.io/cargo-generate/) installed, you can quickly generate a new project template:
+
+```bash
+cargo generate --git catilgrass/mingling-template
+```
+
+Otherwise, add `Mingling` to your `Cargo.toml`:
+
 ```toml
 # From crates.io
 mingling = "0.1.8"
