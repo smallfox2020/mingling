@@ -40,7 +40,7 @@ None
 
 --- 
 
-### Release 0.1.7
+### Release 0.1.7 (2026-05-04)
 
 #### Fixes:
 
@@ -226,7 +226,7 @@ let (name, age) = Picker::new(prev.inner)
 
 ---
 
-### Release 0.1.6 **\[YANKED\]**
+### Release 0.1.6 (2026-04-20) **\[YANKED 26.4.24\]**
 
 `Mingling` 0.1.6 primarily focuses on optimizing the writing experience and code completion.
 
@@ -280,7 +280,7 @@ fn proc(_prev: SomeType) -> NextProcess {
 
 ---
 
-### Release 0.1.5
+### Release 0.1.5 (2026-04-12)
 
 #### Fixes:
 None
@@ -299,7 +299,7 @@ None
 
 ---
 
-### Release 0.1.4
+### Release 0.1.4 (2026-04-06)
 
 #### Fixes:
 None
@@ -318,7 +318,7 @@ None
 
 ---
 
-### Release 0.1.3
+### Release 0.1.3 (2026-04-01)
 
 #### Fixes:
 
@@ -337,7 +337,7 @@ None
 
 ---
 
-### Release 0.1.2
+### Release 0.1.2 (2026-03-31)
 
 #### Fixes:
 None
@@ -353,7 +353,7 @@ None
 
 ---
 
-### Release 0.1.1
+### Release 0.1.1 (2026-03-29)
 
 #### Fixes:
 None
@@ -371,7 +371,7 @@ None
 
 ---
 
-### Release 0.1.0
+### Release 0.1.0 (2026-03-29)
 
 Initial release of the Mingling framework.
 
