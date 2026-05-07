@@ -419,6 +419,7 @@ macro_rules! __dispatch_program_chains {
 }
 
 /// Get all registered dispatcher names from the program
+#[allow(unused_variables)]
 pub fn get_nodes<C: ProgramCollect<Enum = C>>(
     program: &'static Program<C>,
 ) -> Vec<(String, &'static (dyn Dispatcher<C> + Send + Sync + 'static))> {

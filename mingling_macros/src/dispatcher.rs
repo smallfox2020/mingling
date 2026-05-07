@@ -4,9 +4,13 @@
 //! with automatic implementations of the `Dispatcher` trait.
 
 use proc_macro::TokenStream;
+use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
 use syn::parse::{Parse, ParseStream};
 use syn::{Ident, Result as SynResult, Token};
+
+#[cfg(feature = "dispatch_tree")]
+use crate::COMPILE_TIME_DISPATCHERS;
 
 enum DispatcherChainInput {
     Explicit {
@@ -96,6 +100,8 @@ pub fn dispatcher(input: TokenStream) -> TokenStream {
 
     let comp_entry = get_comp_entry(&pack);
 
+    let dispatch_tree_entry = get_dispatch_tree_entry(&command_name_str, &command_struct, &pack);
+
     let expanded = {
         let program_ident = if use_default {
             Ident::new("ThisProgram", proc_macro2::Span::call_site())
@@ -110,6 +116,7 @@ pub fn dispatcher(input: TokenStream) -> TokenStream {
             ::mingling::macros::pack!(#program_ident, #pack = Vec<String>);
 
             #comp_entry
+            #dispatch_tree_entry
 
             impl ::mingling::Dispatcher<#program_ident> for #command_struct {
                 fn node(&self) -> ::mingling::Node {
@@ -129,7 +136,7 @@ pub fn dispatcher(input: TokenStream) -> TokenStream {
 }
 
 #[cfg(feature = "comp")]
-fn get_comp_entry(entry_name: &Ident) -> proc_macro2::TokenStream {
+fn get_comp_entry(entry_name: &Ident) -> TokenStream2 {
     let comp_entry = quote! {
         impl ::mingling::CompletionEntry for #entry_name {
             fn get_input(self) -> Vec<String> {
@@ -141,6 +148,84 @@ fn get_comp_entry(entry_name: &Ident) -> proc_macro2::TokenStream {
 }
 
 #[cfg(not(feature = "comp"))]
-fn get_comp_entry(_entry_name: &Ident) -> proc_macro2::TokenStream {
+fn get_comp_entry(_entry_name: &Ident) -> TokenStream2 {
     quote! {}
+}
+
+#[cfg(feature = "dispatch_tree")]
+fn get_dispatch_tree_entry(
+    command_name_str: &str,
+    command_struct: &Ident,
+    entry_name: &Ident,
+) -> TokenStream2 {
+    let node_name_lit = syn::LitStr::new(command_name_str, proc_macro2::Span::call_site());
+    quote! {
+        ::mingling::macros::register_dispatcher!(#node_name_lit, #command_struct, #entry_name);
+    }
+}
+
+#[cfg(not(feature = "dispatch_tree"))]
+fn get_dispatch_tree_entry(
+    _command_name_str: &str,
+    _command_struct: &Ident,
+    _entry_name: &Ident,
+) -> TokenStream2 {
+    quote! {}
+}
+
+#[cfg(feature = "dispatch_tree")]
+/// Input format: ("node.name", DispatcherType, EntryName)
+struct RegisterDispatcherInput {
+    node_name: syn::LitStr,
+    dispatcher_type: Ident,
+    entry_name: Ident,
+}
+
+#[cfg(feature = "dispatch_tree")]
+impl Parse for RegisterDispatcherInput {
+    fn parse(input: ParseStream) -> SynResult<Self> {
+        let node_name = input.parse()?;
+        input.parse::<Token![,]>()?;
+        let dispatcher_type = input.parse()?;
+        input.parse::<Token![,]>()?;
+        let entry_name = input.parse()?;
+        Ok(RegisterDispatcherInput {
+            node_name,
+            dispatcher_type,
+            entry_name,
+        })
+    }
+}
+
+#[cfg(feature = "dispatch_tree")]
+pub fn register_dispatcher(input: TokenStream) -> TokenStream {
+    let RegisterDispatcherInput {
+        node_name,
+        dispatcher_type,
+        entry_name,
+    } = syn::parse_macro_input!(input as RegisterDispatcherInput);
+
+    let node_name_str = node_name.value();
+    let static_name = format!("__internal_dispatcher_{}", node_name_str.replace('.', "_"));
+    let static_ident = Ident::new(&static_name, proc_macro2::Span::call_site());
+
+    // Register node info in the global collection at compile time
+    // Format: "node.name:DispatcherType:EntryName"
+    COMPILE_TIME_DISPATCHERS.lock().unwrap().insert(format!(
+        "{}:{}:{}",
+        node_name_str, dispatcher_type, entry_name
+    ));
+
+    let expanded = quote! {
+        #[doc(hidden)]
+        #[allow(nonstandard_style)]
+        static #static_ident: #dispatcher_type = #dispatcher_type;
+    };
+
+    expanded.into()
+}
+
+#[cfg(not(feature = "dispatch_tree"))]
+pub fn register_dispatcher(_input: TokenStream) -> TokenStream {
+    quote! {}.into()
 }

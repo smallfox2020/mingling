@@ -28,6 +28,8 @@ use syn::parse_macro_input;
 mod chain;
 #[cfg(feature = "comp")]
 mod completion;
+#[cfg(feature = "dispatch_tree")]
+mod dispatch_tree_gen;
 mod dispatcher;
 #[cfg(feature = "clap")]
 mod dispatcher_clap;
@@ -48,6 +50,10 @@ pub(crate) static GENERAL_RENDERERS: Lazy<Mutex<BTreeSet<String>>> =
     Lazy::new(|| Mutex::new(BTreeSet::new()));
 #[cfg(feature = "comp")]
 pub(crate) static COMPLETIONS: Lazy<Mutex<BTreeSet<String>>> =
+    Lazy::new(|| Mutex::new(BTreeSet::new()));
+
+#[cfg(feature = "dispatch_tree")]
+pub(crate) static COMPILE_TIME_DISPATCHERS: Lazy<Mutex<BTreeSet<String>>> =
     Lazy::new(|| Mutex::new(BTreeSet::new()));
 
 pub(crate) static PACKED_TYPES: Lazy<Mutex<BTreeSet<String>>> =
@@ -604,6 +610,24 @@ pub fn register_help(input: TokenStream) -> TokenStream {
     help::register_help(input)
 }
 
+/// Registers a dispatcher at compile time for the `dispatch_tree` feature.
+///
+/// This macro is called internally by [`dispatcher!`](macro.dispatcher.html) when
+/// the `dispatch_tree` feature is enabled. It stores the node name into the global
+/// `COMPILE_TIME_DISPATCHERS` registry and generates a static variable for the
+/// dispatcher instance, which is later used by `gen_program!` to generate the
+/// dispatch tree routing logic.
+///
+/// # Syntax
+///
+/// ```rust,ignore
+/// register_dispatcher!("node.name", DispatcherType, EntryName);
+/// ```
+#[proc_macro]
+pub fn register_dispatcher(input: TokenStream) -> TokenStream {
+    dispatcher::register_dispatcher(input)
+}
+
 /// Declares a help rendering function for an entry type.
 ///
 /// The `#[help]` attribute converts a function into a help provider by:
@@ -1130,6 +1154,45 @@ pub fn program_final_gen(input: TokenStream) -> TokenStream {
     #[cfg(not(feature = "general_renderer"))]
     let general_render = quote! {};
 
+    #[cfg(feature = "dispatch_tree")]
+    let compile_time_dispatchers: Vec<String> = COMPILE_TIME_DISPATCHERS
+        .lock()
+        .unwrap()
+        .clone()
+        .iter()
+        .cloned()
+        .collect();
+
+    #[cfg(feature = "dispatch_tree")]
+    let dispatch_tree_nodes = {
+        let entries: Vec<(String, String, String)> = compile_time_dispatchers
+            .iter()
+            .filter_map(|entry| {
+                let parts: Vec<&str> = entry.split(':').collect();
+                if parts.len() == 3 {
+                    Some((
+                        parts[0].to_string(),
+                        parts[1].to_string(),
+                        parts[2].to_string(),
+                    ))
+                } else {
+                    None
+                }
+            })
+            .collect();
+
+        let get_nodes_fn = dispatch_tree_gen::gen_get_nodes(&entries);
+        let dispatch_trie_fn = dispatch_tree_gen::gen_dispatch_args_trie(&entries);
+
+        quote! {
+            #get_nodes_fn
+            #dispatch_trie_fn
+        }
+    };
+
+    #[cfg(not(feature = "dispatch_tree"))]
+    let dispatch_tree_nodes = quote! {};
+
     #[cfg(feature = "comp")]
     let completion_tokens: Vec<proc_macro2::TokenStream> = completions
         .iter()
@@ -1215,6 +1278,7 @@ pub fn program_final_gen(input: TokenStream) -> TokenStream {
                     _ => false
                 }
             }
+            #dispatch_tree_nodes
             #general_render
             #comp
         }

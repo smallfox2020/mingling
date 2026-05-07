@@ -107,6 +107,8 @@ pub mod macros {
     pub use mingling_macros::r_println;
     /// Used to register a chain
     pub use mingling_macros::register_chain;
+    /// Used to register a dispatcher for dispatch_tree feature
+    pub use mingling_macros::register_dispatcher;
     /// Used to register a help
     pub use mingling_macros::register_help;
     /// Used to register a renderer
