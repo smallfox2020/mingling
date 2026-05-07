@@ -16,6 +16,7 @@ async = []
 
 clap = []
 comp = []
+dispatch_tree = []
 general_renderer = []
 repl = []
 

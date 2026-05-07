@@ -26,6 +26,7 @@ async = ["mingling_core/async", "mingling_macros/async"]
 default = ["mingling_core/default", "mingling_macros/default"]
 
 clap = ["mingling_core/clap", "mingling_macros/clap"]
+dispatch_tree = ["mingling_core/dispatch_tree", "mingling_macros/dispatch_tree"]
 general_renderer = [
     "mingling_core/general_renderer",
     "dep:serde",

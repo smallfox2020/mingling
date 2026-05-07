@@ -11,9 +11,7 @@ nightly = []
 default = []
 async = []
 
-clap = []
-comp = ["dep:just_template"]
-debug = ["dep:log", "dep:env_logger"]
+dispatch_tree = []
 general_renderer = [
     "dep:serde",
     "dep:ron",
@@ -22,6 +20,10 @@ general_renderer = [
     "dep:toml",
 ]
 repl = []
+
+clap = []
+comp = ["dep:just_template"]
+debug = ["dep:log", "dep:env_logger"]
 
 [dependencies]
 just_fmt = "0.1.2"
