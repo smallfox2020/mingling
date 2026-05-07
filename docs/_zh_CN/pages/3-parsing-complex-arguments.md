@@ -175,8 +175,7 @@ fn handle_greet_entry(prev: GreetEntry) -> NextProcess {
             name.replace(['-', '_', '.'], " ")
                 .to_lowercase()
                 .trim()
-                .to_string();
-            name
+                .to_string()
         })
         .unpack();
  
