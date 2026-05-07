@@ -99,6 +99,12 @@ impl<ResType: 'static + Send + Sync> std::ops::Deref for GlobalResource<ResType>
     }
 }
 
+impl<ResType: 'static + Send + Sync> AsRef<ResType> for GlobalResource<ResType> {
+    fn as_ref(&self) -> &ResType {
+        &self.res_arc
+    }
+}
+
 /// Resource marker trait, types that implement the Clone and Default traits can be considered as resources
 pub trait ResourceMarker {
     fn res_clone(&self) -> Self;

@@ -12,6 +12,29 @@ None
 
 1. **\[macros\]** The `gen_program!()` macro now generates `pub fn this() -> &'static Program<#name>` for the generated program type, providing convenient static accessors.
 
+2. **\[macros\]** The `#[chain]` macro now supports resource injection parameters (2nd to Nth). When you write:
+
+```rust
+#[chain]
+fn process(prev: HelloEntry, age: &Age, name: &Name) -> NextProcess {
+    // age and name are automatically injected from global resources
+}
+```
+
+Will expand: 
+
+```rust
+fn proc(prev: HelloEntry) -> ChainProcess<ThisProgram> {
+    let age: &Age = ::mingling::this::<ThisProgram>()
+        .res_or_default::<Age>()
+        .as_ref();
+    let name: &Name = ::mingling::this::<ThisProgram>()
+        .res_or_default::<Name>()
+        .as_ref();
+    // original function body inlined here
+}
+```
+
 #### **BREAKING CHANGES**:
 None
 
