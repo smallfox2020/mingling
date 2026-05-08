@@ -294,6 +294,8 @@ where
 pub trait ProgramCollect {
     /// Enum type representing internal IDs for the program
     type Enum: Display;
+    type DispatcherNotFound: Groupped<Self::Enum>;
+    type RendererNotFound: Groupped<Self::Enum>;
 
     /// Use a prefix tree to quickly match arguments and dispatch to an Entry
     #[cfg(feature = "dispatch_tree")]

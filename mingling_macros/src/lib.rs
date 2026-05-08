@@ -1243,6 +1243,8 @@ pub fn program_final_gen(input: TokenStream) -> TokenStream {
 
         impl ::mingling::ProgramCollect for #name {
             type Enum = #name;
+            type DispatcherNotFound = DispatcherNotFound;
+            type RendererNotFound = RendererNotFound;
             fn build_renderer_not_found(member_id: Self::Enum) -> ::mingling::AnyOutput<Self::Enum> {
                 ::mingling::AnyOutput::new(RendererNotFound::new(member_id.to_string()))
             }
