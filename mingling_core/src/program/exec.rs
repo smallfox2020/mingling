@@ -137,6 +137,7 @@ where
 
 /// Match user input against registered dispatchers and return the matched dispatcher and remaining arguments.
 #[allow(clippy::type_complexity)]
+#[allow(clippy::ptr_arg)]
 pub(crate) fn match_user_input<C>(
     program: &'static Program<C>,
     args: &Vec<String>,

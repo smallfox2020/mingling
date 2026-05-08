@@ -474,5 +474,5 @@ pub fn get_nodes<C: ProgramCollect<Enum = C>>(
         }
     }
 
-    return r;
+    r
 }
