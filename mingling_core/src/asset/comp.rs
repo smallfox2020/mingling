@@ -12,7 +12,10 @@ pub use shell_ctx::*;
 #[doc(hidden)]
 pub use suggest::*;
 
-use crate::{ProgramCollect, debug, exec::match_user_input, only_debug, this, trace};
+use crate::{ProgramCollect, debug, only_debug, this, trace};
+
+#[cfg(not(feature = "dispatch_tree"))]
+use crate::exec::match_user_input;
 
 /// Trait for implementing completion logic.
 ///
@@ -42,20 +45,24 @@ pub struct CompletionHelper;
 impl CompletionHelper {
     pub fn exec_completion<P>(ctx: &ShellContext) -> Suggest
     where
-        P: ProgramCollect<Enum = P> + Display + 'static,
+        P: ProgramCollect<Enum = P> + Display + PartialEq + 'static,
     {
         only_debug! {
             crate::debug::init_env_logger();
             trace_ctx(ctx);
         };
 
-        let program = this::<P>();
         let args = ctx.all_words.iter().skip(1).cloned().collect::<Vec<_>>();
+        trace!("arguments=\"{}\"", args.join(", "));
+
+        #[cfg(not(feature = "dispatch_tree"))]
+        let program = this::<P>();
+
+        #[cfg(not(feature = "dispatch_tree"))]
         let suggest = if let Ok((dispatcher, args)) = match_user_input(program, &args) {
             trace!(
-                "dispatcher matched, dispatcher=\"{}\", args={:?}",
+                "dispatcher matched, dispatcher=\"{}\"",
                 dispatcher.node().to_string(),
-                args
             );
             let begin = dispatcher.begin(args);
             if let crate::ChainProcess::Ok((any, _)) = begin {
@@ -66,6 +73,24 @@ impl CompletionHelper {
             } else {
                 trace!("begin not Ok");
                 None
+            }
+        } else {
+            trace!("no dispatcher matched");
+            None
+        };
+        #[cfg(feature = "dispatch_tree")]
+        let suggest = if let Ok(any) = P::dispatch_args_trie(&args) {
+            trace!("entry type: {}", any.member_id);
+
+            let dispatcher_not_found = <P::DispatcherNotFound as crate::Groupped<P>>::member_id();
+
+            if dispatcher_not_found == any.member_id {
+                trace!("begin not Ok");
+                None
+            } else {
+                let result = P::do_comp(&any, ctx);
+                trace!("do_comp result: {:?}", result);
+                Some(result)
             }
         } else {
             trace!("no dispatcher matched");
