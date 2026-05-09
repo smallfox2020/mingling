@@ -5,3 +5,6 @@ mod picker;
 pub use crate::parser::picker::*;
 
 pub use crate::parser::picker::bools::*;
+
+#[cfg(test)]
+mod test;

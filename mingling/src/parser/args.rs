@@ -3,9 +3,17 @@ use std::mem::replace;
 use mingling_core::{Flag, special_argument, special_arguments, special_flag};
 
 /// User input arguments
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct Argument {
     vec: Vec<String>,
+}
+
+impl From<Vec<&str>> for Argument {
+    fn from(vec: Vec<&str>) -> Self {
+        Argument {
+            vec: vec.into_iter().map(|s| s.to_string()).collect(),
+        }
+    }
 }
 
 impl From<&'static str> for Argument {
