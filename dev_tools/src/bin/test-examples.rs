@@ -38,7 +38,7 @@ fn main() {
 
 /// Parse test config from TOML file
 fn load_config() -> TestConfig {
-    let content = std::fs::read_to_string("examples/test-example-async.toml").unwrap_or_else(|e| {
+    let content = std::fs::read_to_string("examples/test-examples.toml").unwrap_or_else(|e| {
         eprintln_cargo_style!("Failed to read TOML config file: {}", e);
         std::process::exit(1);
     });
