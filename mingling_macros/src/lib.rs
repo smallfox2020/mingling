@@ -68,7 +68,7 @@ pub(crate) static RENDERERS_EXIST: Lazy<Mutex<BTreeSet<String>>> =
 pub(crate) static HELP_REQUESTS: Lazy<Mutex<BTreeSet<String>>> =
     Lazy::new(|| Mutex::new(BTreeSet::new()));
 
-/// Creates a [`Node`] from a dot-separated path string.
+/// Creates a `Node` from a dot-separated path string.
 ///
 /// Each segment is converted to kebab-case (unless it starts with `_`).
 /// Segments are joined via `.join()` calls, building a path hierarchy for
@@ -102,7 +102,7 @@ pub(crate) static HELP_REQUESTS: Lazy<Mutex<BTreeSet<String>>> =
 /// Node::default().join("remote").join("control")
 /// ```
 ///
-/// This macro is typically used internally by [`dispatcher!`] and should rarely
+/// This macro is typically used internally by `dispatcher!` and should rarely
 /// need to be called directly.
 #[proc_macro]
 pub fn node(input: TokenStream) -> TokenStream {
@@ -113,8 +113,8 @@ pub fn node(input: TokenStream) -> TokenStream {
 /// trait implementations for use in the Mingling chain/render pipeline.
 ///
 /// The generated struct implements: `From`/`Into`, `AsRef`/`AsMut`, `Deref`/`DerefMut`,
-/// `Default` (conditional on inner type), and conversion into [`AnyOutput`] /
-/// [`ChainProcess`] for routing.
+/// `Default` (conditional on inner type), and conversion into `AnyOutput` /
+/// `ChainProcess` for routing.
 ///
 /// # Syntax
 ///
@@ -160,7 +160,7 @@ pub fn pack(input: TokenStream) -> TokenStream {
 }
 
 /// Early-returns an error from a `Result`, converting the `Ok` branch to a
-/// [`ChainProcess`].
+/// `ChainProcess`.
 ///
 /// This macro is equivalent to:
 /// ```rust,ignore
@@ -197,11 +197,11 @@ pub fn route(input: TokenStream) -> TokenStream {
     TokenStream::from(expanded)
 }
 
-/// Creates a [`Dispatcher`] implementation for a subcommand.
+/// Creates a `Dispatcher` implementation for a subcommand.
 ///
 /// This is the primary way to define command-line subcommands in Mingling.
 /// It generates a dispatcher struct that, when matched against user input,
-/// converts the arguments into a [`ChainProcess`] via the specified entry type.
+/// converts the arguments into a `ChainProcess` via the specified entry type.
 ///
 /// # Syntax
 ///
@@ -229,7 +229,7 @@ pub fn route(input: TokenStream) -> TokenStream {
 /// ```
 ///
 /// The generated `HelloCommand` implements `Dispatcher<ThisProgram>`:
-/// - `node()` returns the [`Node`] hierarchy for "hello"
+/// - `node()` returns the `Node` hierarchy for "hello"
 /// - `begin(args)` wraps `args` into `HelloEntry` and routes to chain
 /// - `clone_dispatcher()` returns a boxed clone
 ///
@@ -243,10 +243,10 @@ pub fn dispatcher(input: TokenStream) -> TokenStream {
     dispatcher::dispatcher(input)
 }
 
-/// Prints formatted text to the current [`RenderResult`] buffer within a
-/// [`#[renderer]`](macro.renderer.html) function.
+/// Prints formatted text to the current `RenderResult` buffer within a
+/// `#[renderer]`(macro.renderer.html) function.
 ///
-/// This macro requires a mutable reference to a [`RenderResult`] named `r`
+/// This macro requires a mutable reference to a `RenderResult` named `r`
 /// to be in scope, which is automatically provided inside `#[renderer]`
 /// functions.
 ///
@@ -271,16 +271,16 @@ pub fn dispatcher(input: TokenStream) -> TokenStream {
 ///
 /// # Difference from `r_println!`
 ///
-/// `r_print!` does **not** append a newline. Use [`r_println!`] for newline-terminated output.
+/// `r_print!` does **not** append a newline. Use `r_println!` for newline-terminated output.
 #[proc_macro]
 pub fn r_print(input: TokenStream) -> TokenStream {
     render::r_print(input)
 }
 
-/// Prints formatted text followed by a newline to the current [`RenderResult`]
-/// buffer within a [`#[renderer]`](macro.renderer.html) function.
+/// Prints formatted text followed by a newline to the current `RenderResult`
+/// buffer within a `#[renderer]`(macro.renderer.html) function.
 ///
-/// This macro requires a mutable reference to a [`RenderResult`] named `r`
+/// This macro requires a mutable reference to a `RenderResult` named `r`
 /// to be in scope, which is automatically provided inside `#[renderer]`
 /// functions.
 ///
@@ -313,7 +313,7 @@ pub fn r_println(input: TokenStream) -> TokenStream {
 ///
 /// The `#[chain]` attribute converts an ordinary function (or async function
 /// with the `async` feature) into a chain step by:
-/// 1. Generating a hidden struct implementing the [`Chain`] trait.
+/// 1. Generating a hidden struct implementing the `Chain` trait.
 /// 2. Registering the chain mapping in the global chain registry.
 /// 3. Keeping the original function for direct calls.
 ///
@@ -376,14 +376,14 @@ pub fn chain(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// Declares a renderer step that renders the output of a chain to the terminal.
 ///
 /// The `#[renderer]` attribute converts a function into a renderer by:
-/// 1. Generating a hidden struct implementing the [`Renderer`] trait.
+/// 1. Generating a hidden struct implementing the `Renderer` trait.
 /// 2. Registering the renderer mapping in the global renderer registry.
 /// 3. Keeping the original function for direct calls. When called directly,
 ///    a new `RenderResult` is created and the renderer function writes its
 ///    output directly to the current terminal output buffer.
 ///
-/// Inside a `#[renderer]` function, you can use [`r_print!`] and [`r_println!`]
-/// to write output to the [`RenderResult`] buffer.
+/// Inside a `#[renderer]` function, you can use `r_print!` and `r_println!`
+/// to write output to the `RenderResult` buffer.
 ///
 /// # Syntax
 ///
@@ -442,7 +442,7 @@ pub fn renderer(_attr: TokenStream, item: TokenStream) -> TokenStream {
 /// **This macro is only available with the `comp` feature.**
 ///
 /// The `#[completion]` attribute converts a function into a completion provider by:
-/// 1. Generating a hidden struct implementing the [`Completion`] trait.
+/// 1. Generating a hidden struct implementing the `Completion` trait.
 /// 2. Registering the completion mapping for the specified entry type.
 /// 3. Keeping the original function for direct calls.
 ///
@@ -495,7 +495,7 @@ pub fn completion(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// before execution.
 ///
 /// The `#[program_setup]` attribute converts a function into a setup step by:
-/// 1. Generating a struct implementing the [`ProgramSetup`] trait.
+/// 1. Generating a struct implementing the `ProgramSetup` trait.
 /// 2. The setup function receives a mutable reference to `&mut Program<G>`.
 ///
 /// # Syntax
@@ -537,7 +537,7 @@ pub fn program_setup(attr: TokenStream, item: TokenStream) -> TokenStream {
     program_setup::setup_attr(attr, item)
 }
 
-/// Declares a [`Dispatcher`] that uses [`clap::Parser`] for argument parsing.
+/// Declares a `Dispatcher` that uses `clap::Parser` for argument parsing.
 ///
 /// **This macro is only available with the `clap` feature.**
 ///
@@ -594,7 +594,7 @@ pub fn dispatcher_clap(attr: TokenStream, item: TokenStream) -> TokenStream {
 
 /// Registers a help request mapping between an entry type and a help struct.
 ///
-/// This macro is used internally by the [`#[help]`](macro.help.html) attribute
+/// This macro is used internally by the `#[help]`(macro.help.html) attribute
 /// and is also available for manual registration if needed.
 ///
 /// # Syntax
@@ -612,7 +612,7 @@ pub fn register_help(input: TokenStream) -> TokenStream {
 
 /// Registers a dispatcher at compile time for the `dispatch_tree` feature.
 ///
-/// This macro is called internally by [`dispatcher!`](macro.dispatcher.html) when
+/// This macro is called internally by `dispatcher!`(macro.dispatcher.html) when
 /// the `dispatch_tree` feature is enabled. It stores the node name into the global
 /// `COMPILE_TIME_DISPATCHERS` registry and generates a static variable for the
 /// dispatcher instance, which is later used by `gen_program!` to generate the
@@ -631,12 +631,12 @@ pub fn register_dispatcher(input: TokenStream) -> TokenStream {
 /// Declares a help rendering function for an entry type.
 ///
 /// The `#[help]` attribute converts a function into a help provider by:
-/// 1. Generating a hidden struct implementing the [`HelpRequest`] trait.
+/// 1. Generating a hidden struct implementing the `HelpRequest` trait.
 /// 2. Registering the help mapping in the global `HELP_REQUESTS` registry.
 /// 3. Keeping the original function for direct calls (with a dummy `RenderResult`).
 ///
-/// Inside a `#[help]` function, you can use [`r_print!`] and [`r_println!`]
-/// to write help text to the [`RenderResult`] buffer.
+/// Inside a `#[help]` function, you can use `r_print!` and `r_println!`
+/// to write help text to the `RenderResult` buffer.
 ///
 /// # Syntax
 ///
@@ -672,7 +672,7 @@ pub fn help(_attr: TokenStream, item: TokenStream) -> TokenStream {
     help::help_attr(item)
 }
 
-/// Derive macro for automatically implementing the [`Groupped`] trait on a struct.
+/// Derive macro for automatically implementing the `Groupped` trait on a struct.
 ///
 /// The `#[derive(Groupped)]` macro:
 /// 1. Implements `Groupped<Group>` where the group is specified via `#[group(GroupName)]`.
@@ -709,7 +709,7 @@ pub fn derive_groupped(input: TokenStream) -> TokenStream {
     groupped::derive_groupped(input)
 }
 
-/// Derive macro for automatically implementing the [`EnumTag`] trait on an enum
+/// Derive macro for automatically implementing the `EnumTag` trait on an enum
 /// with unit-only variants.
 ///
 /// The `#[derive(EnumTag)]` macro generates:
@@ -751,7 +751,7 @@ pub fn derive_enum_tag(input: TokenStream) -> TokenStream {
     enum_tag::derive_enum_tag(input)
 }
 
-/// Derive macro for implementing both [`Groupped`] and `serde::Serialize` on a struct.
+/// Derive macro for implementing both `Groupped` and `serde::Serialize` on a struct.
 ///
 /// **This macro is only available with the `general_renderer` feature.**
 ///
@@ -792,7 +792,7 @@ pub fn derive_groupped_serialize(input: TokenStream) -> TokenStream {
 ///
 /// This macro **must** be called at the end of your program module to collect
 /// all registered types, chains, renderers, and help requests into a single
-/// program enum that implements [`ProgramCollect`].
+/// program enum that implements `ProgramCollect`.
 ///
 /// # Syntax
 ///
@@ -933,7 +933,7 @@ pub fn program_comp_gen(input: TokenStream) -> TokenStream {
 /// Registers a type into the global packed types registry for inclusion in
 /// the program enum generated by `gen_program!`.
 ///
-/// This macro is called internally by [`pack!`] and [`#[derive(Groupped)]`](macro.derive_groupped.html)
+/// This macro is called internally by `pack!` and `#[derive(Groupped)]`(macro.derive_groupped.html)
 /// and is generally not needed in user code. However, it can be used for manual
 /// registration if you are implementing custom type registration outside of
 /// the standard macros.
@@ -958,7 +958,7 @@ pub fn register_type(input: TokenStream) -> TokenStream {
 
 /// Registers a chain mapping from a previous type to a chain struct.
 ///
-/// This macro is called internally by [`#[chain]`](macro.chain.html) and is
+/// This macro is called internally by `#[chain]`(macro.chain.html) and is
 /// generally not needed in user code. It inserts entries into the global
 /// `CHAINS` and `CHAINS_EXIST` registries.
 ///
@@ -969,7 +969,7 @@ pub fn register_type(input: TokenStream) -> TokenStream {
 /// ```
 ///
 /// The `PreviousType` is the input type of the chain step, and `ChainStruct`
-/// is the generated struct that implements the [`Chain`] trait.
+/// is the generated struct that implements the `Chain` trait.
 #[proc_macro]
 pub fn register_chain(input: TokenStream) -> TokenStream {
     chain::register_chain(input)
@@ -977,7 +977,7 @@ pub fn register_chain(input: TokenStream) -> TokenStream {
 
 /// Registers a renderer mapping from a type to a renderer struct.
 ///
-/// This macro is called internally by [`#[renderer]`](macro.renderer.html) and is
+/// This macro is called internally by `#[renderer]`(macro.renderer.html) and is
 /// generally not needed in user code. It inserts entries into the global
 /// `RENDERERS`, `RENDERERS_EXIST` and (with `general_renderer` feature)
 /// `GENERAL_RENDERERS` registries.
@@ -989,13 +989,13 @@ pub fn register_chain(input: TokenStream) -> TokenStream {
 /// ```
 ///
 /// The `PreviousType` is the input type of the renderer, and `RendererStruct`
-/// is the generated struct that implements the [`Renderer`] trait.
+/// is the generated struct that implements the `Renderer` trait.
 #[proc_macro]
 pub fn register_renderer(input: TokenStream) -> TokenStream {
     renderer::register_renderer(input)
 }
 
-/// Internal macro used by [`gen_program!`] to generate fallback types.
+/// Internal macro used by `gen_program!` to generate fallback types.
 ///
 /// This macro generates two fallback wrapper types that are essential
 /// for error handling in the Mingling pipeline:
@@ -1036,8 +1036,8 @@ pub fn program_fallback_gen(input: TokenStream) -> TokenStream {
     TokenStream::from(expanded)
 }
 
-/// Internal macro used by [`gen_program!`] to generate the final program enum
-/// and its [`ProgramCollect`] implementation.
+/// Internal macro used by `gen_program!` to generate the final program enum
+/// and its `ProgramCollect` implementation.
 ///
 /// This is the core code generation macro that:
 /// 1. Collects all registered types (from `pack!`, `#[derive(Groupped)]`, etc.) and
@@ -1296,7 +1296,7 @@ pub fn program_final_gen(input: TokenStream) -> TokenStream {
     TokenStream::from(expanded)
 }
 
-/// Builds a [`Suggest`] instance with inline suggestion items.
+/// Builds a `Suggest` instance with inline suggestion items.
 ///
 /// **This macro is only available with the `comp` feature.**
 ///
@@ -1345,18 +1345,18 @@ pub fn program_final_gen(input: TokenStream) -> TokenStream {
 ///
 /// # Related
 ///
-/// - [`suggest_enum!`](macro.suggest_enum.html) — Build suggestions from an [`EnumTag`] enum.
+/// - `suggest_enum!`(macro.suggest_enum.html) — Build suggestions from an `EnumTag` enum.
 #[cfg(feature = "comp")]
 #[proc_macro]
 pub fn suggest(input: TokenStream) -> TokenStream {
     suggest::suggest(input)
 }
 
-/// Builds a [`Suggest`] instance from an [`EnumTag`] enum's variants.
+/// Builds a `Suggest` instance from an `EnumTag` enum's variants.
 ///
 /// **This macro is only available with the `comp` feature.**
 ///
-/// The `suggest_enum!` macro iterates over all variants of an [`EnumTag`]-derived
+/// The `suggest_enum!` macro iterates over all variants of an `EnumTag`-derived
 /// enum and creates suggestion items using each variant's display name
 /// (from `#[enum_rename]`) and description (from `#[enum_desc]`).
 ///
@@ -1409,8 +1409,8 @@ pub fn suggest(input: TokenStream) -> TokenStream {
 ///
 /// # Related
 ///
-/// - [`suggest!`](macro.suggest.html) — Build suggestions with inline syntax.
-/// - [`EnumTag`](derive.EnumTag.html) — The derive macro required for the enum type.
+/// - `suggest!`(macro.suggest.html) — Build suggestions with inline syntax.
+/// - `EnumTag`(derive.EnumTag.html) — The derive macro required for the enum type.
 #[cfg(feature = "comp")]
 #[proc_macro]
 pub fn suggest_enum(input: TokenStream) -> TokenStream {

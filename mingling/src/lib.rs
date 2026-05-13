@@ -5,16 +5,15 @@
 //!
 //! # Use
 //!
-//! ```rust,ignore
+//! ```rust
 //! use mingling::macros::{dispatcher, gen_program, r_println, renderer};
 //!
-//! #[tokio::main]
-//! async fn main() {
+//! fn main() {
 //!     let mut program = ThisProgram::new();
 //!     program.with_dispatcher(HelloCommand);
 //!
 //!     // Execute
-//!     program.exec().await;
+//!     program.exec();
 //! }
 //!
 //! // Define command: "<bin> hello"
@@ -139,6 +138,12 @@ pub mod _mingling_examples {
 }
 
 mod features;
+
+/// Module for checking which features are enabled at compile time.
+///
+/// Each constant re-exported from this module corresponds to a Cargo feature flag.
+/// They can be used for conditional compilation or runtime branching based on
+/// feature availability.
 pub mod feature {
     /// Whether the `async` feature is enabled
     pub use crate::features::MINGLING_ASYNC;
@@ -170,8 +175,10 @@ pub mod feature {
 
 mod setups;
 
+/// Setups provided by Mingling, which can extend command-line programs.
 pub mod setup {
     pub use crate::setups::*;
 }
 
+/// Mutable global resources provided within Mingling
 pub mod res;
