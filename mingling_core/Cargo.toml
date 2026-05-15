@@ -10,7 +10,7 @@ repository.workspace = true
 nightly = []
 default = []
 async = []
-builds = ["dep:dirs"]
+builds = []
 
 dispatch_tree = []
 general_renderer = ["dep:serde"]
@@ -28,8 +28,6 @@ debug = ["dep:log", "dep:env_logger"]
 [dependencies]
 just_fmt.workspace = true
 once_cell.workspace = true
-
-dirs = { workspace = true, optional = true }
 
 # comp
 just_template = { workspace = true, optional = true }
