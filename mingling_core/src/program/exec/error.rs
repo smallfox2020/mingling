@@ -1,33 +1,71 @@
 use crate::error::{ChainProcessError, ProgramPanic};
+use std::fmt;
 
-#[derive(thiserror::Error, Debug)]
+#[derive(Debug)]
 pub enum ProgramExecuteError {
-    #[error("No Dispatcher Found")]
     DispatcherNotFound,
-
-    #[error("No Renderer (`{0}`) Found")]
     RendererNotFound(String),
-
-    #[error("Panic: {0:?}")]
-    Panic(#[from] ProgramPanic),
-
-    #[error("Other error: {0}")]
+    Panic(ProgramPanic),
     Other(String),
 }
 
-#[derive(thiserror::Error, Debug)]
+impl fmt::Display for ProgramExecuteError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ProgramExecuteError::DispatcherNotFound => write!(f, "No Dispatcher Found"),
+            ProgramExecuteError::RendererNotFound(s) => {
+                write!(f, "No Renderer (`{}`) Found", s)
+            }
+            ProgramExecuteError::Panic(p) => write!(f, "Panic: {:?}", p),
+            ProgramExecuteError::Other(s) => write!(f, "Other error: {}", s),
+        }
+    }
+}
+
+impl std::error::Error for ProgramExecuteError {}
+
+impl From<ProgramPanic> for ProgramExecuteError {
+    fn from(value: ProgramPanic) -> Self {
+        ProgramExecuteError::Panic(value)
+    }
+}
+
+#[derive(Debug)]
 pub enum ProgramInternalExecuteError {
-    #[error("No Dispatcher Found")]
     DispatcherNotFound,
-
-    #[error("No Renderer (`{0}`) Found")]
     RendererNotFound(String),
-
-    #[error("Other error: {0}")]
     Other(String),
+    IO(std::io::Error),
+}
 
-    #[error("IO error: {0}")]
-    IO(#[from] std::io::Error),
+impl fmt::Display for ProgramInternalExecuteError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ProgramInternalExecuteError::DispatcherNotFound => {
+                write!(f, "No Dispatcher Found")
+            }
+            ProgramInternalExecuteError::RendererNotFound(s) => {
+                write!(f, "No Renderer (`{}`) Found", s)
+            }
+            ProgramInternalExecuteError::Other(s) => write!(f, "Other error: {}", s),
+            ProgramInternalExecuteError::IO(e) => write!(f, "IO error: {}", e),
+        }
+    }
+}
+
+impl std::error::Error for ProgramInternalExecuteError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            ProgramInternalExecuteError::IO(e) => Some(e),
+            _ => None,
+        }
+    }
+}
+
+impl From<std::io::Error> for ProgramInternalExecuteError {
+    fn from(e: std::io::Error) -> Self {
+        ProgramInternalExecuteError::IO(e)
+    }
 }
 
 impl From<ProgramInternalExecuteError> for ProgramExecuteError {

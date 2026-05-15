@@ -28,7 +28,6 @@ debug = ["dep:log", "dep:env_logger"]
 
 [dependencies]
 just_fmt.workspace = true
-thiserror.workspace = true
 once_cell.workspace = true
 
 dirs = { workspace = true, optional = true }

@@ -1,9 +1,7 @@
 use std::any::Any;
 use std::fmt;
-use thiserror::Error;
 
 /// Error type returned when a panic occurs during execution.
-#[derive(Error)]
 pub struct ProgramPanic {
     pub payload: Box<dyn Any + Send>,
 }
