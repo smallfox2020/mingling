@@ -1,6 +1,13 @@
 use mingling_core::{ProgramCollect, this};
 
 /// Represents a program exit code.
+///
+/// This struct should be used together with `ExitCodeSetup`:
+/// ```ignore
+/// program.with_setup(ExitCodeSetup::default());
+/// ```
+/// The exit code is stored globally per `ProgramCollect` type and can be
+/// retrieved via [`exit_code()`] or updated via [`update_exit_code()`].
 #[derive(Debug, Default, Clone, Copy)]
 pub struct ExitCode {
     /// The numeric exit code value.
