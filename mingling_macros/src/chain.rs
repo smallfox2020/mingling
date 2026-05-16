@@ -5,8 +5,6 @@ use syn::{
     FnArg, Ident, ItemFn, Pat, PatType, ReturnType, Signature, Type, TypePath, parse_macro_input,
 };
 
-use crate::DEFAULT_PROGRAM_NAME;
-
 /// Extracted information about a resource injection parameter
 struct ResourceInjection {
     var_name: Ident,
@@ -137,12 +135,10 @@ pub fn chain_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
     // Parse the attribute arguments (e.g., MyProgram from #[chain(MyProgram)])
     // If no argument is provided, use ThisProgram
     let (group_name, use_crate_prefix) = if attr.is_empty() {
-        (
-            Ident::new(DEFAULT_PROGRAM_NAME, proc_macro2::Span::call_site()),
-            true,
-        )
+        (crate::default_program_path(), true)
     } else {
-        (parse_macro_input!(attr as Ident), false)
+        let path: syn::Path = parse_macro_input!(attr as syn::Path);
+        (quote! { #path }, false)
     };
 
     // Parse the function item
@@ -235,7 +231,7 @@ pub fn chain_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
     let program_type = if use_crate_prefix {
         crate::default_program_path()
     } else {
-        quote! { #group_name }
+        group_name.clone()
     };
 
     // Check for async fn + &mut combination, which is not supported

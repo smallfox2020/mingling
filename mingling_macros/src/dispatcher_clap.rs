@@ -65,7 +65,7 @@ enum DispatcherClapInput {
     },
     /// `(Program, "cmd", Disp, ...)`
     Explicit {
-        group_name: Ident,
+        group_name: syn::Path,
         command_name: LitStr,
         dispatcher_struct: Ident,
         options: ClapOptions,
@@ -76,9 +76,11 @@ impl Parse for DispatcherClapInput {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let lookahead = input.lookahead1();
 
-        if lookahead.peek(Ident) && input.peek2(Token![,]) && input.peek3(syn::LitStr) {
+        if (input.peek(Ident) || input.peek(Token![crate]))
+            && (input.peek2(Token![::]) || input.peek2(Token![,]))
+        {
             // Explicit format: Program, "cmd", Disp, ...
-            let group_name: Ident = input.parse()?;
+            let group_name: syn::Path = input.parse()?;
             input.parse::<Token![,]>()?;
             let command_name: LitStr = input.parse()?;
             input.parse::<Token![,]>()?;
@@ -132,44 +134,35 @@ pub fn dispatcher_clap_attr(attr: TokenStream, item: TokenStream) -> TokenStream
     let struct_name = &input_struct.ident;
 
     // Determine the program name and other fields
-    let (command_name_str, dispatcher_struct, options, program_ident, program_path) =
-        match &attr_input {
-            DispatcherClapInput::Default {
-                command_name,
-                dispatcher_struct,
-                options,
-            } => {
-                let path = crate::default_program_path();
-                (
-                    command_name.value(),
-                    dispatcher_struct.clone(),
-                    ClapOptions {
-                        error_struct: options.error_struct.clone(),
-                        help_enabled: options.help_enabled,
-                    },
-                    Ident::new(DEFAULT_PROGRAM_NAME, proc_macro2::Span::call_site()),
-                    path,
-                )
-            }
-            DispatcherClapInput::Explicit {
-                group_name,
-                command_name,
-                dispatcher_struct,
-                options,
-            } => {
-                let path = quote! { #group_name };
-                (
-                    command_name.value(),
-                    dispatcher_struct.clone(),
-                    ClapOptions {
-                        error_struct: options.error_struct.clone(),
-                        help_enabled: options.help_enabled,
-                    },
-                    group_name.clone(),
-                    path,
-                )
-            }
-        };
+    let (command_name_str, dispatcher_struct, options, program_path) = match &attr_input {
+        DispatcherClapInput::Default {
+            command_name,
+            dispatcher_struct,
+            options,
+        } => (
+            command_name.value(),
+            dispatcher_struct.clone(),
+            ClapOptions {
+                error_struct: options.error_struct.clone(),
+                help_enabled: options.help_enabled,
+            },
+            crate::default_program_path(),
+        ),
+        DispatcherClapInput::Explicit {
+            group_name,
+            command_name,
+            dispatcher_struct,
+            options,
+        } => (
+            command_name.value(),
+            dispatcher_struct.clone(),
+            ClapOptions {
+                error_struct: options.error_struct.clone(),
+                help_enabled: options.help_enabled,
+            },
+            quote! { #group_name },
+        ),
+    };
 
     // Generate the `begin` method body
     let begin_body = if let Some(ref error_struct) = options.error_struct {
@@ -198,7 +191,7 @@ pub fn dispatcher_clap_attr(attr: TokenStream, item: TokenStream) -> TokenStream
     // Generate the error pack type
     let error_pack = options.error_struct.as_ref().map(|error_struct| {
         quote! {
-            ::mingling::macros::pack!(#program_ident, #error_struct = String);
+            ::mingling::macros::pack!(#program_path, #error_struct = String);
         }
     });
 

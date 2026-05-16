@@ -11,11 +11,10 @@ use syn::{Ident, Result as SynResult, Token};
 
 #[cfg(feature = "dispatch_tree")]
 use crate::COMPILE_TIME_DISPATCHERS;
-use crate::DEFAULT_PROGRAM_NAME;
 
 enum DispatcherChainInput {
     Explicit {
-        group_name: Ident,
+        group_name: syn::Path,
         command_name: syn::LitStr,
         command_struct: Ident,
         pack: Ident,
@@ -29,10 +28,10 @@ enum DispatcherChainInput {
 
 impl Parse for DispatcherChainInput {
     fn parse(input: ParseStream) -> SynResult<Self> {
-        let lookahead = input.lookahead1();
-
-        if lookahead.peek(Ident) && input.peek2(Token![,]) && input.peek3(syn::LitStr) {
-            let group_name = input.parse()?;
+        if (input.peek(Ident) || input.peek(Token![crate]))
+            && (input.peek2(Token![::]) || input.peek2(Token![,]))
+        {
+            let group_name = input.parse::<syn::Path>()?;
             input.parse::<Token![,]>()?;
             let command_name = input.parse()?;
             input.parse::<Token![,]>()?;
@@ -46,7 +45,7 @@ impl Parse for DispatcherChainInput {
                 command_struct,
                 pack,
             })
-        } else if lookahead.peek(syn::LitStr) {
+        } else if input.peek(syn::LitStr) {
             // Default format: "command_name", CommandStruct => ChainStruct
             let command_name = input.parse()?;
             input.parse::<Token![,]>()?;
@@ -60,7 +59,7 @@ impl Parse for DispatcherChainInput {
                 pack,
             })
         } else {
-            Err(lookahead.error())
+            Err(input.lookahead1().error())
         }
     }
 }
@@ -77,23 +76,29 @@ pub fn dispatcher(input: TokenStream) -> TokenStream {
     let dispatcher_input = syn::parse_macro_input!(input as DispatcherChainInput);
 
     // Determine if we're using default or explicit group
-    let (group_name, command_name, command_struct, pack, use_default) = match dispatcher_input {
+    let (command_name, command_struct, pack, _use_default, group_path) = match dispatcher_input {
         DispatcherChainInput::Explicit {
             group_name,
             command_name,
             command_struct,
             pack,
-        } => (group_name, command_name, command_struct, pack, false),
+        } => (
+            command_name,
+            command_struct,
+            pack,
+            false,
+            quote! { #group_name },
+        ),
         DispatcherChainInput::Default {
             command_name,
             command_struct,
             pack,
         } => (
-            Ident::new(DEFAULT_PROGRAM_NAME, proc_macro2::Span::call_site()),
             command_name,
             command_struct,
             pack,
             true,
+            crate::default_program_path(),
         ),
     };
 
@@ -104,22 +109,13 @@ pub fn dispatcher(input: TokenStream) -> TokenStream {
     let dispatch_tree_entry = get_dispatch_tree_entry(&command_name_str, &command_struct, &pack);
 
     let expanded = {
-        let program_ident = if use_default {
-            Ident::new(DEFAULT_PROGRAM_NAME, proc_macro2::Span::call_site())
-        } else {
-            group_name.clone()
-        };
-        let program_path = if use_default {
-            crate::default_program_path()
-        } else {
-            quote! { #group_name }
-        };
+        let program_path = group_path;
 
         quote! {
             #[derive(Debug, Default)]
             pub struct #command_struct;
 
-            ::mingling::macros::pack!(#program_ident, #pack = Vec<String>);
+            ::mingling::macros::pack!(#program_path, #pack = Vec<String>);
 
             #comp_entry
             #dispatch_tree_entry

@@ -3,11 +3,9 @@ use quote::quote;
 use syn::parse::{Parse, ParseStream};
 use syn::{Ident, Result as SynResult, Token, Type};
 
-use crate::DEFAULT_PROGRAM_NAME;
-
 enum PackInput {
     Explicit {
-        group_name: Ident,
+        group_name: syn::Path,
         type_name: Ident,
         inner_type: Type,
     },
@@ -19,12 +17,18 @@ enum PackInput {
 
 impl Parse for PackInput {
     fn parse(input: ParseStream) -> SynResult<Self> {
-        // Try to parse as explicit format first: GroupName, TypeName = InnerType
-        let lookahead = input.lookahead1();
+        // Look ahead to determine format:
+        //   - `Path, TypeName = InnerType`  → Explicit
+        //   - `TypeName = InnerType`          → Default
+        //
+        // Both start with an ident. We peek at the second token:
+        // if it's a `,` or `::`, it's explicit; if it's `=`, it's default.
 
-        if lookahead.peek(Ident) && input.peek2(Token![,]) {
-            // Explicit format: GroupName, TypeName = InnerType
-            let group_name = input.parse()?;
+        if (input.peek(Ident) || input.peek(Token![crate]))
+            && (input.peek2(Token![,]) || input.peek2(Token![::]))
+        {
+            // Explicit format: Path, TypeName = InnerType
+            let group_name = input.parse::<syn::Path>()?;
             input.parse::<Token![,]>()?;
             let type_name = input.parse()?;
             input.parse::<Token![=]>()?;
@@ -35,7 +39,7 @@ impl Parse for PackInput {
                 type_name,
                 inner_type,
             })
-        } else if lookahead.peek(Ident) && input.peek2(Token![=]) {
+        } else if input.peek(Ident) && input.peek2(Token![=]) {
             // Default format: TypeName = InnerType
             let type_name = input.parse()?;
             input.parse::<Token![=]>()?;
@@ -46,14 +50,12 @@ impl Parse for PackInput {
                 inner_type,
             })
         } else {
-            Err(lookahead.error())
+            Err(input.lookahead1().error())
         }
     }
 }
 
 pub fn pack(input: TokenStream) -> TokenStream {
-    let default_program_path = crate::default_program_path();
-
     // Parse the input
     let pack_input = syn::parse_macro_input!(input as PackInput);
 
@@ -63,16 +65,11 @@ pub fn pack(input: TokenStream) -> TokenStream {
             group_name,
             type_name,
             inner_type,
-        } => (group_name, type_name, inner_type, false),
+        } => (quote! { #group_name }, type_name, inner_type, false),
         PackInput::Default {
             type_name,
             inner_type,
-        } => (
-            Ident::new(DEFAULT_PROGRAM_NAME, proc_macro2::Span::call_site()),
-            type_name,
-            inner_type,
-            true,
-        ),
+        } => (crate::default_program_path(), type_name, inner_type, true),
     };
 
     // Generate the struct definition
@@ -211,13 +208,13 @@ pub fn pack(input: TokenStream) -> TokenStream {
             #default_impl
             #register_impl
 
-            impl Into<mingling::AnyOutput<#default_program_path>> for #type_name {
-                fn into(self) -> mingling::AnyOutput<#default_program_path> {
+            impl Into<mingling::AnyOutput<#group_name>> for #type_name {
+                fn into(self) -> mingling::AnyOutput<#group_name> {
                     mingling::AnyOutput::new(self)
                 }
             }
 
-            impl From<#type_name> for mingling::ChainProcess<#default_program_path> {
+            impl From<#type_name> for mingling::ChainProcess<#group_name> {
                 fn from(value: #type_name) -> Self {
                     mingling::AnyOutput::new(value).route_chain()
                 }
@@ -225,19 +222,19 @@ pub fn pack(input: TokenStream) -> TokenStream {
 
             impl #type_name {
                 /// Converts the wrapper type into a `ChainProcess` for chaining operations.
-                pub fn to_chain(self) -> mingling::ChainProcess<#default_program_path> {
+                pub fn to_chain(self) -> mingling::ChainProcess<#group_name> {
                     mingling::AnyOutput::new(self).route_chain()
                 }
 
                 /// Converts the wrapper type into a `ChainProcess` for rendering operations.
-                pub fn to_render(self) -> mingling::ChainProcess<#default_program_path> {
+                pub fn to_render(self) -> mingling::ChainProcess<#group_name> {
                     mingling::AnyOutput::new(self).route_renderer()
                 }
             }
 
-            impl ::mingling::Groupped<#default_program_path> for #type_name {
-                fn member_id() -> #default_program_path {
-                    #default_program_path::#type_name
+            impl ::mingling::Groupped<#group_name> for #type_name {
+                fn member_id() -> #group_name {
+                    #group_name::#type_name
                 }
             }
         }

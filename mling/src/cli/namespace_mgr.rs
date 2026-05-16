@@ -4,10 +4,7 @@ use mingling::{
     parser::{Picker, Yes},
 };
 
-use crate::{
-    ThisProgram,
-    namespace_manager::{list_namespaces, remove_namespace, set_namespace_trusted},
-};
+use crate::namespace_manager::{list_namespaces, remove_namespace, set_namespace_trusted};
 
 dispatcher!("trust", TrustNamespaceCommand => TrustNamespaceEntry);
 dispatcher!("untrust", UntrustNamespaceCommand => UntrustNamespaceEntry);

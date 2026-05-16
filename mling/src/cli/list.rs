@@ -6,7 +6,7 @@ use mingling::{
 };
 use serde::Serialize;
 
-use crate::{ThisProgram, namespace_manager::list_namespaces};
+use crate::namespace_manager::list_namespaces;
 
 dispatcher!("ls-namespace", ListInstalledCommand => ListInstalledEntry);
 

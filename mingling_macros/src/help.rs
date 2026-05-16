@@ -158,7 +158,7 @@ pub fn register_help(input: TokenStream) -> TokenStream {
     // Parse the input as a comma-separated list of arguments
     let input_parsed = syn::parse_macro_input!(input with syn::punctuated::Punctuated<syn::Expr, syn::Token![,]>::parse_terminated);
 
-    // Check that we have exactly two elements
+    // Check if there are exactly two elements
     if input_parsed.len() != 2 {
         return syn::Error::new(
             input_parsed.span(),

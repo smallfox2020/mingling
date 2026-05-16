@@ -115,6 +115,15 @@ this::<ThisProgram>().modify_res::<ExitCode>(|code| {
 
 1. **\[core\]** The signature of `exec` has been changed to `exec(self) -> i32` (previously was `exec(self)`)
 
+2. **\[macros\]** All proc macros that accept a program/group name parameter (e.g. `pack!`, `dispatcher!`, `#[chain]`, `#[program_setup]`, `#[dispatcher_clap]`, `#[derive(Groupped)]`) now parse the name as a `syn::Path` instead of a bare `Ident`. This means:
+   - You can now use paths like `crate::MyProgram` or `my_crate::MyProgram` in addition to plain `MyProgram`.
+   - The default program name `ThisProgram` is no longer re-exported or required as an import — generated code references `crate::ThisProgram` directly.
+   - If you previously imported `ThisProgram` from `crate` only for macro use, that import is no longer needed and can be removed.
+
+```rust
+use crate::ThisProgram; // Can be removed if not used directly
+```
+
 --- 
 
 ### Release 0.1.7 (2026-05-04)

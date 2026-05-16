@@ -53,8 +53,8 @@ pub fn setup_attr(attr: TokenStream, item: TokenStream) -> TokenStream {
     let (program_name, use_crate_prefix) = if attr.is_empty() {
         (crate::default_program_path(), true)
     } else {
-        let ident: Ident = parse_macro_input!(attr as Ident);
-        (quote! { #ident }, false)
+        let path: syn::Path = parse_macro_input!(attr as syn::Path);
+        (quote! { #path }, false)
     };
 
     // Parse the function item

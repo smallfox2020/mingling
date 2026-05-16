@@ -7,10 +7,7 @@ use mingling::{
 };
 use serde::Serialize;
 
-use crate::{
-    ThisProgram,
-    project_solver::{BinaryItem, solve_current_dir},
-};
+use crate::project_solver::{BinaryItem, solve_current_dir};
 
 dispatcher!("show-target-dir", ReadTargetDirCommand => ReadTargetDirEntry);
 dispatcher!("show-workspace-root", ReadWorkspaceRootCommand => ReadWorkspaceRootEntry);
