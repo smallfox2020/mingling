@@ -129,6 +129,7 @@ where
         }
     }
 
+    #[allow(dead_code)]
     pub(crate) fn run_hook_exec_panic(&self, panic_info: &ProgramPanic) {
         if !self.user_context.run_hook {
             return;
