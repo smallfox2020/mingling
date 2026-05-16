@@ -23,13 +23,19 @@ fn extract_args_info(sig: &Signature) -> syn::Result<(Pat, TypePath, Vec<Resourc
         ));
     }
 
-    // First parameter: required, the previous chain type
+    // First parameter: required, the previous chain type (must be owned, not a reference)
     let first_arg = &sig.inputs[0];
     let (prev_param, previous_type) = match first_arg {
         FnArg::Typed(PatType { pat, ty, .. }) => {
             let param_pat = (**pat).clone();
             match &**ty {
                 Type::Path(type_path) => (param_pat, type_path.clone()),
+                Type::Reference(_) => {
+                    return Err(syn::Error::new(
+                        ty.span(),
+                        "The first parameter (previous type) must be taken by move, not by reference. Use `prev: SomeEntry` instead of `prev: &SomeEntry`.",
+                    ));
+                }
                 _ => {
                     return Err(syn::Error::new(
                         ty.span(),
@@ -79,7 +85,12 @@ fn extract_args_info(sig: &Signature) -> syn::Result<(Pat, TypePath, Vec<Resourc
                             ));
                         }
                     },
-                    Type::Path(type_path) => (type_path.clone(), false, false),
+                    Type::Path(_) => {
+                        return Err(syn::Error::new(
+                            ty.span(),
+                            "Resource injection parameter must be a reference (`&T` or `&mut T`), not an owned value. Use `age: &Age` instead of `age: Age`.",
+                        ));
+                    }
                     _ => {
                         return Err(syn::Error::new(
                             ty.span(),
