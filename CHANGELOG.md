@@ -111,6 +111,22 @@ this::<ThisProgram>().modify_res::<ExitCode>(|code| {
 12. **\[core\]** Added panic catch for program execution. 
 13. **\[core\]** Added the `stdout_setting.silence_panic` option, which is disabled by default. When enabled, `Program`'s `panic!` will not output to the console
 
+14. **\[macros\]** `#[chain]` now supports a no-return-value mode, which will automatically return `crate::EmptyResult::new(()).to_chain()`
+
+```rust
+#[chain]
+fn my_chain(prev: Prev) {
+    // Do something
+}
+
+// Equivalent to
+#[chain]
+fn my_chain(prev: Prev) -> Next {
+    // Do something
+    crate::EmptyResult::new(()).to_chain()
+}
+```
+
 #### **BREAKING CHANGES**:
 
 1. **\[core\]** The signature of `exec` has been changed to `exec(self) -> i32` (previously was `exec(self)`)

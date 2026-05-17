@@ -401,6 +401,7 @@ pub trait ProgramCollect {
     type Enum;
     type DispatcherNotFound: Groupped<Self::Enum>;
     type RendererNotFound: Groupped<Self::Enum>;
+    type EmptyResult: Groupped<Self::Enum>;
 
     /// Use a prefix tree to quickly match arguments and dispatch to an Entry
     #[cfg(feature = "dispatch_tree")]
@@ -417,6 +418,9 @@ pub trait ProgramCollect {
 
     /// Build an [AnyOutput](./struct.AnyOutput.html) to indicate that a dispatcher was not found
     fn build_dispatcher_not_found(args: Vec<String>) -> AnyOutput<Self::Enum>;
+
+    /// Build an [AnyOutput](./struct.AnyOutput.html) to indicate that the chain returned an empty result
+    fn build_empty_result() -> AnyOutput<Self::Enum>;
 
     /// Render the input [AnyOutput](./struct.AnyOutput.html)
     fn render(any: AnyOutput<Self::Enum>, r: &mut RenderResult);

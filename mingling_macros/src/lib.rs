@@ -1138,13 +1138,15 @@ pub fn register_renderer(input: TokenStream) -> TokenStream {
 
 /// Internal macro used by `gen_program!` to generate fallback types.
 ///
-/// This macro generates two fallback wrapper types that are essential
+/// This macro generates the fallback wrapper types that are essential
 /// for error handling in the Mingling pipeline:
 ///
 /// - **`RendererNotFound`** — Wraps a `String` (the name of the missing renderer).
 ///   Used when no matching renderer is found for a given output type.
 /// - **`DispatcherNotFound`** — Wraps `Vec<String>` (the unrecognized command args).
 ///   Used when no matching dispatcher is found for user input.
+/// - **`EmptyResult`** — Wraps `()` (the unit type).
+///   Used when the chain returns an empty result.
 ///
 /// Users can (and should) write `#[renderer]` functions for these types
 /// to provide meaningful error messages.
@@ -1165,6 +1167,7 @@ pub fn register_renderer(input: TokenStream) -> TokenStream {
 /// ```rust,ignore
 /// pack!(ProgramName, RendererNotFound = String);
 /// pack!(ProgramName, DispatcherNotFound = Vec<String>);
+/// pack!(ProgramName, EmptyResult = ());
 /// ```
 #[proc_macro]
 pub fn program_fallback_gen(input: TokenStream) -> TokenStream {
@@ -1173,6 +1176,7 @@ pub fn program_fallback_gen(input: TokenStream) -> TokenStream {
     let expanded = quote! {
         ::mingling::macros::pack!(#name, RendererNotFound = String);
         ::mingling::macros::pack!(#name, DispatcherNotFound = Vec<String>);
+        ::mingling::macros::pack!(#name, EmptyResult = ());
     };
     TokenStream::from(expanded)
 }
@@ -1213,6 +1217,7 @@ pub fn program_fallback_gen(input: TokenStream) -> TokenStream {
 ///
 /// impl ProgramCollect for MyProgram {
 ///     type Enum = MyProgram;
+///     type EmptyResult = EmptyResult;
 ///     fn render(any, r) { /* dispatches to all registered renderers */ }
 ///     fn do_chain(any) -> ChainProcess { /* dispatches to all registered chain steps */ }
 ///     fn render_help(any, r) { /* dispatches to all registered help handlers */ }
@@ -1386,11 +1391,15 @@ pub fn program_final_gen(input: TokenStream) -> TokenStream {
             type Enum = #name;
             type DispatcherNotFound = DispatcherNotFound;
             type RendererNotFound = RendererNotFound;
+            type EmptyResult = EmptyResult;
             fn build_renderer_not_found(member_id: Self::Enum) -> ::mingling::AnyOutput<Self::Enum> {
                 ::mingling::AnyOutput::new(RendererNotFound::new(member_id.to_string()))
             }
             fn build_dispatcher_not_found(args: Vec<String>) -> ::mingling::AnyOutput<Self::Enum> {
                 ::mingling::AnyOutput::new(DispatcherNotFound::new(args))
+            }
+            fn build_empty_result() -> ::mingling::AnyOutput<Self::Enum> {
+                ::mingling::AnyOutput::new(EmptyResult::new(()))
             }
             ::mingling::__dispatch_program_renderers!(
                 #(#renderer_tokens)*
