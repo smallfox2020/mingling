@@ -1,5 +1,10 @@
+/// Represents an error that occurs during serialization of a general renderer.
+///
+/// This error stores a human-readable message describing what went wrong
+/// during the serialization process.
 #[derive(Debug)]
 pub struct GeneralRendererSerializeError {
+    /// The underlying error message.
     error: String,
 }
 

@@ -1,11 +1,23 @@
 use crate::error::{ChainProcessError, ProgramPanic};
 use std::fmt;
 
+/// Errors that can occur during program execution.
+///
+/// This enum represents the various error conditions that may arise
+/// when executing a program, including missing dispatchers/renderers,
+/// panics, and other miscellaneous errors.
 #[derive(Debug)]
 pub enum ProgramExecuteError {
+    /// No dispatcher was found to handle the program execution.
     DispatcherNotFound,
+
+    /// No renderer was found for the given name.
     RendererNotFound(String),
+
+    /// The program encountered a panic during execution.
     Panic(ProgramPanic),
+
+    /// An other error occurred.
     Other(String),
 }
 
@@ -30,11 +42,25 @@ impl From<ProgramPanic> for ProgramExecuteError {
     }
 }
 
+/// Errors that can occur during internal program execution.
+///
+/// This enum represents error conditions that arise specifically within
+/// the internal execution pipeline of a program, including missing
+/// dispatchers/renderers, I/O errors, and other miscellaneous failures.
+/// These errors are typically not exposed directly to the end user but
+/// are used internally and can be converted into [`ProgramExecuteError`].
 #[derive(Debug)]
 pub enum ProgramInternalExecuteError {
+    /// No dispatcher was found to handle the program execution.
     DispatcherNotFound,
+
+    /// No renderer was found for the given name.
     RendererNotFound(String),
+
+    /// An other internal error occurred.
     Other(String),
+
+    /// An I/O error occurred during execution.
     IO(std::io::Error),
 }
 

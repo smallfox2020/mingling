@@ -1,8 +1,12 @@
 use crate::error::ProgramInternalExecuteError;
 
+/// Represents errors that can occur during chain processing.
 #[derive(Debug)]
 pub enum ChainProcessError {
+    /// An error with a custom description.
     Other(String),
+
+    /// An I/O error that occurred during chain processing.
     IO(std::io::Error),
 }
 
