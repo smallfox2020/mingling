@@ -1,27 +1,14 @@
-use crate::error::ProgramPanic;
-
-#[cfg(feature = "comp")]
-use crate::{ShellContext, Suggest};
-
-#[cfg(feature = "general_renderer")]
-use crate::error::GeneralRendererSerializeError;
-
 #[cfg(not(windows))]
 use std::env;
 
 use crate::{
-    AnyOutput, ChainProcess, GlobalResources, Groupped, RenderResult,
-    asset::dispatcher::Dispatcher,
-    error::{ChainProcessError, ProgramExecuteError},
+    AnyOutput, GlobalResources, asset::dispatcher::Dispatcher, error::ChainProcessError,
     hook::ProgramHook,
 };
 use std::{
     collections::HashMap,
-    sync::{Arc, Mutex, OnceLock},
+    sync::{Arc, Mutex},
 };
-
-#[cfg(feature = "async")]
-use std::pin::Pin;
 
 #[doc(hidden)]
 pub mod error;
@@ -32,6 +19,19 @@ pub mod hook;
 #[doc(hidden)]
 pub mod setup;
 
+mod collection;
+pub use collection::*;
+
+mod once_exec;
+
+#[cfg(feature = "repl")]
+mod repl_exec;
+#[cfg(feature = "repl")]
+pub use repl_exec::*;
+
+mod single_instance;
+pub use single_instance::*;
+
 mod config;
 pub use config::*;
 
@@ -40,25 +40,6 @@ pub use flag::*;
 
 mod string_vec;
 pub use string_vec::*;
-
-/// Global static reference to the current program instance
-static THIS_PROGRAM: OnceLock<Option<Box<dyn std::any::Any + Send + Sync>>> = OnceLock::new();
-
-/// Returns a reference to the current program instance, panics if not set.
-pub fn this<C>() -> &'static Program<C>
-where
-    C: ProgramCollect<Enum = C> + 'static,
-{
-    try_get_this_program().expect("Program not initialized")
-}
-
-/// Returns a reference to the current program instance, if set.
-fn try_get_this_program<C>() -> Option<&'static Program<C>>
-where
-    C: ProgramCollect<Enum = C> + 'static,
-{
-    THIS_PROGRAM.get()?.as_ref()?.downcast_ref::<Program<C>>()
-}
 
 /// Program, used to define the behavior of the entire command-line program
 #[derive(Default)]
@@ -171,295 +152,6 @@ where
             Err(e) => Err(e.into()),
         }
     }
-}
-
-// Async program
-#[cfg(feature = "async")]
-impl<C> Program<C>
-where
-    C: ProgramCollect<Enum = C>,
-{
-    async fn exec_wrapper<F, Fut>(self, f: F) -> Result<Fut::Output, ProgramPanic>
-    where
-        C: 'static + Send + Sync,
-        F: FnOnce(&'static Program<C>) -> Fut + Send + Sync,
-        Fut: Future + Send,
-    {
-        THIS_PROGRAM.get_or_init(|| Some(Box::new(self)));
-        let program = THIS_PROGRAM
-            .get()
-            .unwrap()
-            .as_ref()
-            .unwrap()
-            .downcast_ref::<Program<C>>()
-            .unwrap();
-
-        #[cfg(not(panic = "abort"))]
-        if program.stdout_setting.silence_panic {
-            std::panic::set_hook(Box::new(|_| {}));
-        }
-
-        #[cfg(panic = "abort")]
-        return Ok(f(program));
-
-        #[cfg(not(panic = "abort"))]
-        match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(program))) {
-            Ok(fut) => Ok(fut.await),
-            Err(panic_info) => {
-                let panic_payload = ProgramPanic {
-                    payload: panic_info,
-                };
-                program.run_hook_exec_panic(&panic_payload);
-                Err(panic_payload)
-            }
-        }
-    }
-
-    /// Run the command line program
-    pub async fn exec_without_render(mut self) -> Result<RenderResult, ProgramExecuteError>
-    where
-        C: 'static + Send + Sync,
-    {
-        // Run hooks
-        self.run_hook_on_begin();
-
-        self.args = self.args.iter().skip(1).cloned().collect();
-        match self
-            .exec_wrapper(|p| async { crate::exec::exec(p).await.map_err(|e| e.into()) })
-            .await
-        {
-            Ok(r) => r,
-            Err(e) => Err(ProgramExecuteError::Panic(e)),
-        }
-    }
-
-    /// Run the command line program
-    pub async fn exec(self) -> i32
-    where
-        C: 'static + Send + Sync,
-    {
-        let stdout_setting = self.stdout_setting.clone();
-        let result = match self.exec_without_render().await {
-            Ok(r) => r,
-            Err(e) => match e {
-                ProgramExecuteError::DispatcherNotFound => {
-                    eprintln!("Dispatcher not found");
-                    return 1;
-                }
-                ProgramExecuteError::RendererNotFound(renderer_name) => {
-                    eprintln!("Renderer `{}` not found", renderer_name);
-                    return 1;
-                }
-                ProgramExecuteError::Other(e) => {
-                    eprintln!("{}", e);
-                    return 1;
-                }
-                ProgramExecuteError::Panic(unwinded_error) => {
-                    eprintln!("{}", unwinded_error);
-                    return 1;
-                }
-            },
-        };
-
-        // Render result
-        if stdout_setting.render_output && !result.is_empty() {
-            let exit_code = result.exit_code;
-            print!("{}", result);
-
-            if let Err(e) = std::io::Write::flush(&mut std::io::stdout())
-                && stdout_setting.error_output
-            {
-                eprintln!("{}", e);
-                1
-            } else {
-                exit_code
-            }
-        } else {
-            0
-        }
-    }
-
-    /// Run the command line program, then exit
-    pub async fn exec_and_exit(self)
-    where
-        C: 'static + Send + Sync,
-    {
-        std::process::exit(self.exec().await)
-    }
-}
-
-// Sync program
-#[cfg(not(feature = "async"))]
-impl<C> Program<C>
-where
-    C: ProgramCollect<Enum = C>,
-{
-    fn exec_wrapper<F, R>(self, f: F) -> Result<R, ProgramPanic>
-    where
-        C: 'static + Send + Sync,
-        F: FnOnce(&'static Program<C>) -> R + Send + Sync,
-    {
-        THIS_PROGRAM.get_or_init(|| Some(Box::new(self)));
-        let program = THIS_PROGRAM
-            .get()
-            .unwrap()
-            .as_ref()
-            .unwrap()
-            .downcast_ref::<Program<C>>()
-            .unwrap();
-
-        #[cfg(not(panic = "abort"))]
-        if program.stdout_setting.silence_panic {
-            std::panic::set_hook(Box::new(|_| {}));
-        }
-
-        #[cfg(panic = "abort")]
-        return Ok(f(program));
-
-        #[cfg(not(panic = "abort"))]
-        match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(program))) {
-            Ok(result) => Ok(result),
-            Err(panic_info) => {
-                let panic_payload = ProgramPanic {
-                    payload: panic_info,
-                };
-                program.run_hook_exec_panic(&panic_payload);
-                Err(panic_payload)
-            }
-        }
-    }
-
-    /// Run the command line program
-    pub fn exec_without_render(mut self) -> Result<RenderResult, ProgramExecuteError>
-    where
-        C: 'static + Send + Sync,
-    {
-        // Run hooks
-        self.run_hook_on_begin();
-
-        self.args = self.args.iter().skip(1).cloned().collect();
-        match self.exec_wrapper(|p| crate::exec::exec(p).map_err(|e| e.into())) {
-            Ok(r) => r,
-            Err(e) => Err(ProgramExecuteError::Panic(e)),
-        }
-    }
-
-    /// Run the command line program
-    pub fn exec(self) -> i32
-    where
-        C: 'static + Send + Sync,
-    {
-        let stdout_setting = self.stdout_setting.clone();
-        let result = match self.exec_without_render() {
-            Ok(r) => r,
-            Err(e) => match e {
-                ProgramExecuteError::DispatcherNotFound => {
-                    eprintln!("Dispatcher not found");
-                    return 1;
-                }
-                ProgramExecuteError::RendererNotFound(renderer_name) => {
-                    eprintln!("Renderer `{}` not found", renderer_name);
-                    return 1;
-                }
-                ProgramExecuteError::Other(e) => {
-                    eprintln!("{}", e);
-                    return 1;
-                }
-                ProgramExecuteError::Panic(unwinded_error) => {
-                    eprintln!("{}", unwinded_error);
-                    return 1;
-                }
-            },
-        };
-
-        // Render result
-        if stdout_setting.render_output && !result.is_empty() {
-            let exit_code = result.exit_code;
-            print!("{}", result);
-
-            if let Err(e) = std::io::Write::flush(&mut std::io::stdout())
-                && stdout_setting.error_output
-            {
-                eprintln!("{}", e);
-                1
-            } else {
-                exit_code
-            }
-        } else {
-            0
-        }
-    }
-
-    /// Run the command line program, then exit
-    pub fn exec_and_exit(self)
-    where
-        C: 'static + Send + Sync,
-    {
-        std::process::exit(self.exec())
-    }
-}
-
-/// Collected program context
-///
-/// Note: It is recommended to use the `gen_program!()` macro from [mingling_macros](https://crates.io/crates/mingling_macros) to automatically create this type
-pub trait ProgramCollect {
-    /// Enum type representing internal IDs for the program
-    type Enum;
-    type DispatcherNotFound: Groupped<Self::Enum>;
-    type RendererNotFound: Groupped<Self::Enum>;
-    type EmptyResult: Groupped<Self::Enum>;
-
-    /// Use a prefix tree to quickly match arguments and dispatch to an Entry
-    #[cfg(feature = "dispatch_tree")]
-    fn dispatch_args_trie(
-        raw: &Vec<String>,
-    ) -> Result<AnyOutput<Self::Enum>, crate::error::ProgramInternalExecuteError>;
-
-    /// Get all registered dispatcher names from the program
-    #[cfg(feature = "dispatch_tree")]
-    fn get_nodes() -> Vec<(String, &'static (dyn Dispatcher<Self::Enum> + Send + Sync))>;
-
-    /// Build an [AnyOutput](./struct.AnyOutput.html) to indicate that a renderer was not found
-    fn build_renderer_not_found(member_id: Self::Enum) -> AnyOutput<Self::Enum>;
-
-    /// Build an [AnyOutput](./struct.AnyOutput.html) to indicate that a dispatcher was not found
-    fn build_dispatcher_not_found(args: Vec<String>) -> AnyOutput<Self::Enum>;
-
-    /// Build an [AnyOutput](./struct.AnyOutput.html) to indicate that the chain returned an empty result
-    fn build_empty_result() -> AnyOutput<Self::Enum>;
-
-    /// Render the input [AnyOutput](./struct.AnyOutput.html)
-    fn render(any: AnyOutput<Self::Enum>, r: &mut RenderResult);
-
-    /// Render help for Entry
-    fn render_help(any: AnyOutput<Self::Enum>, r: &mut RenderResult);
-
-    /// Find a matching chain to continue execution based on the input [AnyOutput](./struct.AnyOutput.html), returning a new [AnyOutput](./struct.AnyOutput.html)
-    #[cfg(feature = "async")]
-    fn do_chain(
-        any: AnyOutput<Self::Enum>,
-    ) -> Pin<Box<dyn Future<Output = ChainProcess<Self::Enum>> + Send>>;
-
-    /// Find a matching chain to continue execution based on the input [AnyOutput](./struct.AnyOutput.html), returning a new [AnyOutput](./struct.AnyOutput.html)
-    #[cfg(not(feature = "async"))]
-    fn do_chain(any: AnyOutput<Self::Enum>) -> ChainProcess<Self::Enum>;
-
-    /// Match and execute specific completion logic based on any Entry
-    #[cfg(feature = "comp")]
-    fn do_comp(any: &AnyOutput<Self::Enum>, ctx: &ShellContext) -> Suggest;
-
-    /// Whether the program has a renderer that can handle the current [AnyOutput](./struct.AnyOutput.html)
-    fn has_renderer(any: &AnyOutput<Self::Enum>) -> bool;
-
-    /// Whether the program has a chain that can handle the current [AnyOutput](./struct.AnyOutput.html)
-    fn has_chain(any: &AnyOutput<Self::Enum>) -> bool;
-
-    /// Perform general rendering and presentation of any type
-    #[cfg(feature = "general_renderer")]
-    fn general_render(
-        any: AnyOutput<Self::Enum>,
-        setting: &GeneralRendererSetting,
-    ) -> Result<RenderResult, GeneralRendererSerializeError>;
 }
 
 #[macro_export]
