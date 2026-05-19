@@ -18,13 +18,6 @@ where
     ///
     /// This method starts an infinite loop that continuously reads user input, parses commands, executes them,
     /// and displays the execution result or error message. It is suitable for scenarios requiring command-line interaction with the user.
-    ///
-    /// # Important
-    ///
-    /// **REPL mode is currently only available when the `async` feature is disabled; it does not support async.**
-    ///
-    /// If the `async` feature is enabled, this method will be unavailable (as it is protected by `#[cfg(not(feature = "async"))]` conditional compilation).
-    /// Future versions may support asynchronous REPL, but currently only synchronous mode is supported.
     pub fn exec_repl(self) {
         self.run_hook_repl_on_begin();
 
@@ -47,6 +40,41 @@ where
                 }
             }
         });
+    }
+}
+
+#[cfg(feature = "async")]
+impl<C> Program<C>
+where
+    C: ProgramCollect<Enum = C> + Send + Sync + 'static,
+{
+    /// Executes the REPL interactive CLI mode.
+    ///
+    /// This method starts an infinite loop that continuously reads user input, parses commands, executes them,
+    /// and displays the execution result or error message. It is suitable for scenarios requiring command-line interaction with the user.
+    ///
+    /// **Note:** When the `async` feature is enabled, panic unwinding is not supported.
+    /// Any panics during command execution will result in an abort rather than being caught and handled gracefully.
+    pub async fn exec_repl(self) {
+        self.run_hook_repl_on_begin();
+
+        self.exec_wrapper(async |p| -> ! {
+            loop {
+                p.run_hook_repl_pre_readline();
+                let readline = readline_or_empty();
+                p.run_hook_repl_post_readline(&readline);
+
+                let args = split_input_string(readline.clone());
+
+                match exec_once(p, args).await {
+                    Ok(r) => {
+                        p.run_hook_repl_on_receive_result(&r);
+                    }
+                    _ => {}
+                }
+            }
+        })
+        .await;
     }
 }
 
@@ -98,4 +126,15 @@ where
     };
 
     exec_result
+}
+
+#[cfg(feature = "async")]
+async fn exec_once<C>(
+    p: &'static Program<C>,
+    args: Vec<String>,
+) -> Result<RenderResult, ProgramInternalExecuteError>
+where
+    C: ProgramCollect<Enum = C> + Send + Sync + 'static,
+{
+    super::exec::exec_with_args(p, args).await
 }

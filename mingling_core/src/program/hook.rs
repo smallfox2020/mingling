@@ -2,7 +2,10 @@
 
 use std::any::Any;
 
-use crate::{AnyOutput, Program, ProgramCollect, RenderResult, error::ProgramPanic};
+use crate::{AnyOutput, Program, ProgramCollect, RenderResult};
+
+#[cfg(not(feature = "async"))]
+use crate::error::ProgramPanic;
 
 #[derive(Default)]
 pub struct ProgramHook<C>
@@ -34,6 +37,7 @@ where
     pub finish: Option<fn() -> i32>,
 
     /// Executes when the program panics
+    #[cfg(not(feature = "async"))]
     pub exec_panic: Option<fn(&ProgramPanic)>,
 
     /// Executes when the REPL starts (only available with `repl` feature)
@@ -53,7 +57,7 @@ where
     pub repl_on_receive_result: Option<fn(&RenderResult)>,
 
     /// Executes when the REPL panics (only available with `repl` feature)
-    #[cfg(feature = "repl")]
+    #[cfg(all(feature = "repl", not(feature = "async")))]
     pub repl_on_panic: Option<fn(&ProgramPanic)>,
 }
 
@@ -152,6 +156,7 @@ where
     }
 
     #[allow(dead_code)]
+    #[cfg(not(feature = "async"))]
     pub(crate) fn run_hook_exec_panic(&self, panic_info: &ProgramPanic) {
         if !self.user_context.run_hook {
             return;
@@ -238,7 +243,7 @@ where
     }
 
     /// Runs the REPL panic hooks (only available with `repl` feature)
-    #[cfg(feature = "repl")]
+    #[cfg(all(feature = "repl", not(feature = "async")))]
     pub(crate) fn run_hook_repl_on_panic(&self, panic_info: &ProgramPanic) {
         if !self.user_context.run_hook {
             return;
@@ -267,6 +272,7 @@ where
             pre_render: None,
             post_render: None,
             finish: None,
+            #[cfg(not(feature = "async"))]
             exec_panic: None,
             #[cfg(feature = "repl")]
             repl_on_begin: None,
@@ -276,7 +282,7 @@ where
             repl_post_readline: None,
             #[cfg(feature = "repl")]
             repl_on_receive_result: None,
-            #[cfg(feature = "repl")]
+            #[cfg(all(feature = "repl", not(feature = "async")))]
             repl_on_panic: None,
         }
     }
@@ -330,6 +336,7 @@ where
     }
 
     /// Sets the handler for the `exec_panic` event.
+    #[cfg(not(feature = "async"))]
     pub fn on_exec_panic(mut self, handler: fn(&ProgramPanic)) -> Self {
         let _ = self.exec_panic.insert(handler);
         self
@@ -366,7 +373,7 @@ where
     }
 
     /// Sets the handler for the REPL panic event (only available with `repl` feature).
-    #[cfg(feature = "repl")]
+    #[cfg(all(feature = "repl", not(feature = "async")))]
     pub fn on_repl_panic(mut self, handler: fn(panic: &ProgramPanic)) -> Self {
         let _ = self.repl_on_panic.insert(handler);
         self

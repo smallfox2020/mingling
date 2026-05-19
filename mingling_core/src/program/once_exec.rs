@@ -1,8 +1,8 @@
 use crate::THIS_PROGRAM;
-use crate::{
-    Program, ProgramCollect, RenderResult,
-    error::{ProgramExecuteError, ProgramPanic},
-};
+use crate::{Program, ProgramCollect, RenderResult, error::ProgramExecuteError};
+
+#[cfg(not(feature = "async"))]
+use crate::error::ProgramPanic;
 
 // Async program
 #[cfg(feature = "async")]
@@ -25,11 +25,6 @@ where
             .downcast_ref::<Program<C>>()
             .unwrap();
 
-        #[cfg(not(panic = "abort"))]
-        if program.stdout_setting.silence_panic {
-            std::panic::set_hook(Box::new(|_| {}));
-        }
-
         f(program).await
     }
 
@@ -43,33 +38,9 @@ where
 
         self.args = self.args.iter().skip(1).cloned().collect();
 
-        #[cfg(panic = "abort")]
         return self
             .exec_wrapper(|p| async { crate::exec::exec(p).await.map_err(|e| e.into()) })
             .await;
-
-        #[cfg(not(panic = "abort"))]
-        match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-            self.exec_wrapper(|p| async { crate::exec::exec(p).await.map_err(|e| e.into()) })
-        })) {
-            Ok(fut) => fut.await,
-            Err(panic_info) => {
-                let panic_payload = ProgramPanic {
-                    payload: panic_info,
-                };
-
-                let program = THIS_PROGRAM
-                    .get()
-                    .unwrap()
-                    .as_ref()
-                    .unwrap()
-                    .downcast_ref::<Program<C>>()
-                    .unwrap();
-
-                program.run_hook_exec_panic(&panic_payload);
-                Err(ProgramExecuteError::Panic(panic_payload))
-            }
-        }
     }
 
     /// Run the command line program

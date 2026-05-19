@@ -3,20 +3,16 @@
 ### Release 0.1.9
 
 ### Fixes:
-
 None
 
 ### Optimizings:
-
 None
 
 #### Features:
-
 None
 
 #### **BREAKING CHANGES**:
-
-None
+1. **\[core\]** Panic Unwind will not be supported when the `async` feature is enabled
 
 --- 
 
