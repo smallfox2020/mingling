@@ -13,7 +13,7 @@
 
 use mingling::prelude::*;
 use mingling::{
-    res::{exit_code, update_exit_code},
+    res::{ExitCode, exit_code},
     setup::ExitCodeSetup,
 };
 
@@ -28,8 +28,8 @@ dispatcher!("error", ErrorCommand => ErrorEntry);
 pack!(ResultError = ());
 
 #[chain]
-fn handle_error_entry(_prev: ErrorEntry) -> Next {
-    update_exit_code::<ThisProgram>(1);
+fn handle_error_entry(_prev: ErrorEntry, ec: &mut ExitCode) -> Next {
+    ec.exit_code = 1;
     return ResultError::default();
 }
 

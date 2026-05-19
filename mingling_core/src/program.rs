@@ -26,6 +26,8 @@ mod once_exec;
 
 #[cfg(feature = "repl")]
 mod repl_exec;
+#[cfg(feature = "repl")]
+pub use repl_exec::res::REPL;
 
 mod single_instance;
 pub use single_instance::*;

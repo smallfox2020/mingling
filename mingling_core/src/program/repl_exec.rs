@@ -3,11 +3,15 @@
 
 use std::io::Write;
 
+#[doc(hidden)]
+pub mod res;
+
 mod splitter;
 
 use crate::error::{ProgramInternalExecuteError, ProgramPanic};
 use crate::program::repl_exec::splitter::split_input_string;
 use crate::{Program, ProgramCollect, RenderResult};
+use crate::{program::repl_exec::res::REPL, this};
 
 #[cfg(not(feature = "async"))]
 impl<C> Program<C>
@@ -18,10 +22,13 @@ where
     ///
     /// This method starts an infinite loop that continuously reads user input, parses commands, executes them,
     /// and displays the execution result or error message. It is suitable for scenarios requiring command-line interaction with the user.
-    pub fn exec_repl(self) {
+    pub fn exec_repl(mut self) {
+        // Inject default REPL resource
+        self.with_resource(REPL::default());
+
         self.run_hook_repl_on_begin();
 
-        self.exec_wrapper(|p| -> ! {
+        self.exec_wrapper(|p| -> () {
             loop {
                 p.run_hook_repl_pre_readline();
                 let readline = readline_or_empty();
@@ -37,6 +44,10 @@ where
                         p.run_hook_repl_on_panic(&panic);
                     }
                     _ => {}
+                }
+
+                if this::<C>().res::<REPL>().unwrap().exit {
+                    break;
                 }
             }
         });
@@ -56,9 +67,12 @@ where
     /// **Note:** When the `async` feature is enabled, panic unwinding is not supported.
     /// Any panics during command execution will result in an abort rather than being caught and handled gracefully.
     pub async fn exec_repl(self) {
+        // Inject default REPL resource
+        self.with_resource(REPL::default());
+
         self.run_hook_repl_on_begin();
 
-        self.exec_wrapper(async |p| -> ! {
+        self.exec_wrapper(async |p| -> () {
             loop {
                 p.run_hook_repl_pre_readline();
                 let readline = readline_or_empty();
@@ -71,6 +85,10 @@ where
                         p.run_hook_repl_on_receive_result(&r);
                     }
                     _ => {}
+                }
+
+                if this::<C>().res::<REPL>().unwrap().exit {
+                    break;
                 }
             }
         })

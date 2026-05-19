@@ -8,8 +8,22 @@ None
 ### Optimizings:
 None
 
-#### Features:
-None
+1. **\[macros\]** Added the `empty_result!()` macro for early return from a chain function. This macro is a shorthand for constructing an `EmptyResult` and converting it into a `ChainProcess`, signaling to the pipeline that there is no meaningful output to continue processing.
+
+```rust
+use mingling::macros::empty_result;
+
+#[chain]
+fn maybe_skip(prev: SomeEntry) -> Next {
+    if should_skip() {
+        return empty_result!();
+    }
+    // ... continue processing
+    NextEntry::new(result)
+}
+```
+
+Expands to: `crate::EmptyResult::new(()).to_chain()`
 
 #### **BREAKING CHANGES**:
 1. **\[core\]** Panic Unwind will not be supported when the `async` feature is enabled

@@ -83,6 +83,8 @@ pub mod macros {
     /// Used to create a dispatcher with clap argument parsing
     #[cfg(feature = "clap")]
     pub use mingling_macros::dispatcher_clap;
+    /// Used to create an empty result value for early return from a chain function
+    pub use mingling_macros::empty_result;
     /// Used to collect data and create a command-line context
     pub use mingling_macros::gen_program;
     /// Used to generate a struct implementing the `HelpRequest` trait via a method
@@ -211,6 +213,8 @@ pub mod prelude {
     pub use crate::macros::chain;
     /// Re-export of the `dispatcher` macro for routing commands.
     pub use crate::macros::dispatcher;
+    /// Re-export of the `empty_result` macro for creating an empty result value for early return.
+    pub use crate::macros::empty_result;
     /// Re-export of the `gen_program` macro for generating the program entry point.
     pub use crate::macros::gen_program;
     /// Re-export of the `pack` macro for creating wrapper types.
